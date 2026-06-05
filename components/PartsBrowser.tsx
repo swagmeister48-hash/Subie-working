@@ -239,7 +239,7 @@ export default function PartsBrowser() {
             />
           </div>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Model</summary>
             <div className="filter-list">
               {facets.models.map((item) => (
@@ -256,10 +256,10 @@ export default function PartsBrowser() {
             </div>
           </details>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Chassis</summary>
             <div className="filter-list">
-              {facets.chassis.map((item) => (
+              {facets.chassis.filter((item) => item.n >= 10).map((item) => (
                 <button
                   key={item.v}
                   type="button"
@@ -273,7 +273,7 @@ export default function PartsBrowser() {
             </div>
           </details>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Year range</summary>
             <div className="range-row">
               <label>
@@ -297,7 +297,7 @@ export default function PartsBrowser() {
             </div>
           </details>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Category</summary>
             <div className="filter-list">
               {facets.categories.map((item) => (
@@ -314,7 +314,7 @@ export default function PartsBrowser() {
             </div>
           </details>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Brand</summary>
             <div className="filter-list">
               {facets.brands.map((item) => (
@@ -331,7 +331,7 @@ export default function PartsBrowser() {
             </div>
           </details>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Color</summary>
             <div className="filter-list">
               {facets.colors.map((item) => (
@@ -348,7 +348,7 @@ export default function PartsBrowser() {
             </div>
           </details>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Retailer</summary>
             <div className="filter-list">
               {facets.sellers.map((item) => (
@@ -365,7 +365,7 @@ export default function PartsBrowser() {
             </div>
           </details>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Price</summary>
             <div className="range-row">
               <label>
@@ -391,7 +391,7 @@ export default function PartsBrowser() {
             </div>
           </details>
 
-          <details open className="filter-group">
+          <details className="filter-group">
             <summary>Savings</summary>
             <div className="filter-list savings-list">
               {SAVINGS_OPTIONS.map((option) => (
