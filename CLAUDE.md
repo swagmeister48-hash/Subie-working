@@ -43,6 +43,11 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 - Uses the live Supabase RPC contract: `search_parts` with `p_year_from`, `p_year_to`, `p_chassis`, `p_min_save_pct`, `p_sort = 'save_pct'`, and `get_facets()` returning `{v,n}` objects.
 - Added premium dark theme, responsive slide-over filters, active filter chips, savings presets, and stronger list/card hierarchy.
 - Kept analytics tracking, pageview/search/click_buy behavior, `PAGE_SIZE=40`, debounced search, and `Buy now` opening in a new tab.
+- QA queries:
+  - `chassis = VA` should return ~5,688 comparable parts.
+  - category `Wheels & Tires` should return ~2,636.
+  - savings `25%+` should return ~1,661.
+  - facet badge counts should match filtered result totals exactly.
 
 - eBay is PARKED by Abe's decision — pipeline built and dormant, never re-enable without asking him.
 - `search_parts` and `get_facets` are SECURITY DEFINER; test query performance as the anon role, not as owner.
