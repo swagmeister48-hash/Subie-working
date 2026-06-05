@@ -11,13 +11,25 @@ ready to deploy on Vercel whenever you choose.
 
 ## See it on your computer (optional, needs Node.js)
 1. Install Node.js from https://nodejs.org (the "LTS" button) if you don't have it.
-2. Open Terminal, then:
+2. Copy the example environment file and fill in your Supabase values:
+
+   ```bash
+   cp .env.local.example .env.local
+   # Edit .env.local and replace the example values with your project's
+   # NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.
    ```
-   cd ~/Downloads/Subie-mvp-main/parts-compare
+
+3. Open Terminal in this folder and run:
+
+   ```bash
    npm install
    npm run dev
    ```
-3. Open http://localhost:3000 in your browser.
+
+4. Open http://localhost:3000 (or the port printed by the dev server) in your browser.
+
+Note: the site provides a safe fallback when those env vars are missing so it
+won't crash — but for live data you still need to set the two Supabase values.
 
 ## Going live later (Vercel)
 When you're ready, connect this folder's GitHub repo to Vercel and add the two

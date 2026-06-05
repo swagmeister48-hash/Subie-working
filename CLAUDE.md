@@ -38,6 +38,12 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 ## Catalog state (June 2026)
 ~131,600 parts, ~185k listings, 12 sellers, ~27,400 cross-seller matched. Old MVP benchmark was 16k — beaten. Some suspicious giant price spreads (Forced Performance turbos) worth auditing.
 
+## Frontend notes
+- New UI overhaul in `components/PartsBrowser.tsx` and `app/globals.css`.
+- Uses the live Supabase RPC contract: `search_parts` with `p_year_from`, `p_year_to`, `p_chassis`, `p_min_save_pct`, `p_sort = 'save_pct'`, and `get_facets()` returning `{v,n}` objects.
+- Added premium dark theme, responsive slide-over filters, active filter chips, savings presets, and stronger list/card hierarchy.
+- Kept analytics tracking, pageview/search/click_buy behavior, `PAGE_SIZE=40`, debounced search, and `Buy now` opening in a new tab.
+
 ## Conventions
 - **After every code change, verify functionality with Abe via a "verify block"**: a short console-style summary of what Claude tested (DB queries, timings, counts) plus 1-2 clicks for Abe with the exact expected result.
 - Sample/seed SQL files in parent folder's `setup/` are historical — DB is live, don't re-run them.
