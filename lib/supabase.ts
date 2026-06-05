@@ -21,6 +21,7 @@ export type Part = {
   brand: string | null;
   category: string | null;
   part_number: string | null;
+  seller_count: number;
   models: string[];
   year_min: number | null;
   year_max: number | null;
@@ -35,12 +36,16 @@ export async function searchParts(opts: {
   q?: string;
   model?: string;
   category?: string;
+  year?: number;
+  multiOnly?: boolean;
   offset?: number;
 }): Promise<SearchResult> {
   const { data, error } = await supabase.rpc("search_parts", {
     q: opts.q ?? "",
     p_model: opts.model ?? "",
     p_category: opts.category ?? "",
+    p_year: opts.year ?? 0,
+    p_multi_only: opts.multiOnly ?? false,
     p_limit: PAGE_SIZE,
     p_offset: opts.offset ?? 0,
   });
@@ -51,11 +56,13 @@ export async function searchParts(opts: {
   return (data as SearchResult) ?? { total: 0, rows: [] };
 }
 
-export async function getFacets(): Promise<{ models: string[]; categories: string[] }> {
+export type Facets = { models: string[]; years: number[]; categories: string[] };
+
+export async function getFacets(): Promise<Facets> {
   const { data, error } = await supabase.rpc("get_facets");
   if (error) {
     console.error("get_facets error:", error.message);
-    return { models: [], categories: [] };
+    return { models: [], years: [], categories: [] };
   }
-  return data as { models: string[]; categories: string[] };
+  return data as Facets;
 }

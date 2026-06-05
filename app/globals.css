@@ -46,7 +46,12 @@ a { color: inherit; text-decoration: none; }
 .controls select { width: auto; cursor: pointer; }
 .search input::placeholder { color: var(--muted); }
 
-.meta { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+.meta { color: var(--muted); font-size: 13px; }
+
+.toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); cursor: pointer; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.badge.oos { background: #2a1c1c; color: #e88a7f; }
 
 .list { display: flex; flex-direction: column; gap: 12px; }
 

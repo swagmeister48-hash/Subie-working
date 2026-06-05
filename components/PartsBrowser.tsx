@@ -6,6 +6,7 @@ import {
   getFacets,
   PAGE_SIZE,
   type Part,
+  type Facets,
 } from "@/lib/supabase";
 
 function fmt(n: number) {
@@ -16,10 +17,11 @@ export default function PartsBrowser() {
   const [q, setQ] = useState("");
   const [model, setModel] = useState("");
   const [cat, setCat] = useState("");
+  const [year, setYear] = useState(0);
+  const [multiOnly, setMultiOnly] = useState(true);
   const [page, setPage] = useState(0);
 
-  const [models, setModels] = useState<string[]>([]);
-  const [cats, setCats] = useState<string[]>([]);
+  const [facets, setFacets] = useState<Facets>({ models: [], years: [], categories: [] });
 
   const [rows, setRows] = useState<Part[]>([]);
   const [total, setTotal] = useState(0);
@@ -28,24 +30,20 @@ export default function PartsBrowser() {
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    getFacets().then((f) => {
-      setModels(f.models || []);
-      setCats(f.categories || []);
-    });
+    getFacets().then(setFacets);
   }, []);
 
   const run = useCallback(
     async (offset: number) => {
       setLoading(true);
-      const res = await searchParts({ q, model, category: cat, offset });
+      const res = await searchParts({ q, model, category: cat, year, multiOnly, offset });
       setRows(res.rows);
       setTotal(res.total);
       setLoading(false);
     },
-    [q, model, cat]
+    [q, model, cat, year, multiOnly]
   );
 
-  // Re-search (debounced) whenever filters change; reset to page 0.
   useEffect(() => {
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(() => {
@@ -55,7 +53,7 @@ export default function PartsBrowser() {
     return () => {
       if (debounce.current) clearTimeout(debounce.current);
     };
-  }, [q, model, cat, run]);
+  }, [q, model, cat, year, multiOnly, run]);
 
   function goTo(newPage: number) {
     setPage(newPage);
@@ -78,20 +76,36 @@ export default function PartsBrowser() {
         </div>
         <select value={model} onChange={(e) => setModel(e.target.value)} aria-label="Filter by model">
           <option value="">All models</option>
-          {models.map((m) => (
+          {facets.models.map((m) => (
             <option key={m} value={m}>{m}</option>
+          ))}
+        </select>
+        <select value={year || ""} onChange={(e) => setYear(Number(e.target.value) || 0)} aria-label="Filter by year">
+          <option value="">All years</option>
+          {facets.years.map((y) => (
+            <option key={y} value={y}>{y}</option>
           ))}
         </select>
         <select value={cat} onChange={(e) => setCat(e.target.value)} aria-label="Filter by category">
           <option value="">All categories</option>
-          {cats.map((c) => (
+          {facets.categories.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
       </div>
 
-      <div className="meta">
-        {loading ? "Searching…" : `${total.toLocaleString()} ${total === 1 ? "part" : "parts"} found`}
+      <div className="toggle-row">
+        <label className="toggle">
+          <input
+            type="checkbox"
+            checked={multiOnly}
+            onChange={(e) => setMultiOnly(e.target.checked)}
+          />
+          Only show parts sold by 2+ retailers
+        </label>
+        <span className="meta">
+          {loading ? "Searching…" : `${total.toLocaleString()} ${total === 1 ? "part" : "parts"} found`}
+        </span>
       </div>
 
       <div className="list">
@@ -127,6 +141,7 @@ export default function PartsBrowser() {
                   <div className="seller">
                     {l.seller}
                     {sorted.length > 1 && i === 0 && <span className="badge">Best</span>}
+                    {!l.in_stock && <span className="badge oos">Out of stock</span>}
                   </div>
                   <div className="price-cell">
                     <div>
