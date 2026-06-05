@@ -44,6 +44,10 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 - Added premium dark theme, responsive slide-over filters, active filter chips, savings presets, and stronger list/card hierarchy.
 - Kept analytics tracking, pageview/search/click_buy behavior, `PAGE_SIZE=40`, debounced search, and `Buy now` opening in a new tab.
 
+- eBay is PARKED by Abe's decision — pipeline built and dormant, never re-enable without asking him.
+- `search_parts` and `get_facets` are SECURITY DEFINER; test query performance as the anon role, not as owner.
+- After any large data churn, run `ANALYZE` on `parts`/`listings`/`fitments`/`part_stats`.
+
 ## Conventions
 - **After every code change, verify functionality with Abe via a "verify block"**: a short console-style summary of what Claude tested (DB queries, timings, counts) plus 1-2 clicks for Abe with the exact expected result.
 - Sample/seed SQL files in parent folder's `setup/` are historical — DB is live, don't re-run them.

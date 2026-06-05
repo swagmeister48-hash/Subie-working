@@ -112,7 +112,7 @@ function sessionId(): string {
 
 export function track(type: "pageview" | "search" | "click_buy", data: Record<string, unknown>) {
   try {
-    void supabase.from("events").insert({ type, session_id: sessionId(), data });
+    void supabase.from("events").insert({ type, session_id: sessionId(), data }).then(() => {});
   } catch {
     // analytics must never break the site
   }
