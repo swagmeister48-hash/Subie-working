@@ -1,48 +1,69 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { Part } from "@/lib/supabase";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  searchParts,
+  getFacets,
+  PAGE_SIZE,
+  type Part,
+} from "@/lib/supabase";
 
 function fmt(n: number) {
   return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-export default function PartsBrowser({ parts }: { parts: Part[] }) {
+export default function PartsBrowser() {
   const [q, setQ] = useState("");
   const [model, setModel] = useState("");
   const [cat, setCat] = useState("");
+  const [page, setPage] = useState(0);
 
-  const models = useMemo(
-    () => [...new Set(parts.flatMap((p) => p.models))].sort(),
-    [parts]
-  );
-  const cats = useMemo(
-    () => [...new Set(parts.map((p) => p.category).filter(Boolean) as string[])].sort(),
-    [parts]
-  );
+  const [models, setModels] = useState<string[]>([]);
+  const [cats, setCats] = useState<string[]>([]);
 
-  const rows = useMemo(() => {
-    const text = q.toLowerCase().trim();
-    return parts.filter((p) => {
-      if (model && !p.models.includes(model)) return false;
-      if (cat && p.category !== cat) return false;
-      if (text) {
-        const hay = [
-          p.name,
-          p.brand,
-          p.category,
-          p.part_number,
-          p.models.join(" "),
-          p.listings.map((l) => l.seller).join(" "),
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        if (!text.split(/\s+/).every((t) => hay.includes(t))) return false;
-      }
-      return true;
+  const [rows, setRows] = useState<Part[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    getFacets().then((f) => {
+      setModels(f.models || []);
+      setCats(f.categories || []);
     });
-  }, [parts, q, model, cat]);
+  }, []);
+
+  const run = useCallback(
+    async (offset: number) => {
+      setLoading(true);
+      const res = await searchParts({ q, model, category: cat, offset });
+      setRows(res.rows);
+      setTotal(res.total);
+      setLoading(false);
+    },
+    [q, model, cat]
+  );
+
+  // Re-search (debounced) whenever filters change; reset to page 0.
+  useEffect(() => {
+    if (debounce.current) clearTimeout(debounce.current);
+    debounce.current = setTimeout(() => {
+      setPage(0);
+      run(0);
+    }, 250);
+    return () => {
+      if (debounce.current) clearTimeout(debounce.current);
+    };
+  }, [q, model, cat, run]);
+
+  function goTo(newPage: number) {
+    setPage(newPage);
+    run(newPage * PAGE_SIZE);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  const lastPage = Math.max(0, Math.ceil(total / PAGE_SIZE) - 1);
 
   return (
     <>
@@ -70,7 +91,7 @@ export default function PartsBrowser({ parts }: { parts: Part[] }) {
       </div>
 
       <div className="meta">
-        {rows.length} {rows.length === 1 ? "part" : "parts"} found
+        {loading ? "Searching…" : `${total.toLocaleString()} ${total === 1 ? "part" : "parts"} found`}
       </div>
 
       <div className="list">
@@ -79,7 +100,11 @@ export default function PartsBrowser({ parts }: { parts: Part[] }) {
           const best = sorted[0]?.total ?? 0;
           const save = sorted.length > 1 ? sorted[sorted.length - 1].total - best : 0;
           const yearLabel =
-            p.years.length > 0 ? `${p.years[0]}–${p.years[p.years.length - 1]}` : "";
+            p.year_min && p.year_max
+              ? p.year_min === p.year_max
+                ? `${p.year_min}`
+                : `${p.year_min}–${p.year_max}`
+              : "";
           return (
             <div className="card" key={p.id}>
               <div className="card-top">
@@ -101,13 +126,13 @@ export default function PartsBrowser({ parts }: { parts: Part[] }) {
                 <div className="row" key={l.seller + i}>
                   <div className="seller">
                     {l.seller}
-                    {i === 0 && <span className="badge">Best</span>}
+                    {sorted.length > 1 && i === 0 && <span className="badge">Best</span>}
                   </div>
                   <div className="price-cell">
                     <div>
                       <div className="price-num">{fmt(l.total)}</div>
                       <div className="price-ship">
-                        {l.shipping ? `${fmt(l.price)} + ${fmt(l.shipping)} ship` : "free ship"}
+                        {l.shipping ? `${fmt(l.price)} + ${fmt(l.shipping)} ship` : "+ shipping at checkout"}
                       </div>
                     </div>
                     <button
@@ -123,8 +148,16 @@ export default function PartsBrowser({ parts }: { parts: Part[] }) {
             </div>
           );
         })}
-        {rows.length === 0 && <div className="empty">No parts match those filters.</div>}
+        {!loading && rows.length === 0 && <div className="empty">No parts match those filters.</div>}
       </div>
+
+      {total > PAGE_SIZE && (
+        <div className="pager">
+          <button onClick={() => goTo(page - 1)} disabled={page === 0}>← Prev</button>
+          <span className="pager-info">Page {page + 1} of {lastPage + 1}</span>
+          <button onClick={() => goTo(page + 1)} disabled={page >= lastPage}>Next →</button>
+        </div>
+      )}
     </>
   );
 }
