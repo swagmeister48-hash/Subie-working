@@ -18,6 +18,7 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 - `categorize()` + category_rules map ~1,100 messy store categories into ~17 clean groups in `parts.category_group`.
 - Search runs through RPC `search_parts(q, p_model, p_category, p_year, p_multi_only, p_limit, p_offset)` — punctuation-insensitive via `parts.search_blob`. Facets via `get_facets()` (cached).
 - After ANY big data churn: run `analyze` on parts/listings/fitments/part_stats or anon queries hit the 8s statement timeout (this bit us twice).
+- `search_parts` and `get_facets` are SECURITY DEFINER (RLS re-checks cost anon ~10x; these are read-only public-catalog functions, so it's safe). Keep them read-only. Test performance AS ANON (`set local role anon`) — owner-role timings lie.
 
 ## Automation (all in Supabase pg_cron)
 - `nightly-parts-crawl` 07:00 UTC — kicks edge function `crawl-driver` (self-chaining, crawls all stores page-by-page, logs to crawl_log).
@@ -26,9 +27,10 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 
 ## eBay (working — verified end-to-end by Abe)
 - Bright Data Web Scraper API, eBay dataset `gd_ltr9mjt81n0zzdk1fb`, discover_by=keywords, input field `keywords`, cap with limit_per_input. Token: Abe provides (rotate periodically).
-- **Abe's rule**: only keep an eBay listing if it's CHEAPER than every store's price for that part; nightly refresh must evict eBay listings that stop winning.
+- **Abe's rules**: New eBay listings must beat every store price; Used must beat by 15%+. All listings title-verified by `match_ebay_snapshot(snap)` (part-number-in-title proof, incl. brand-prefix-stripped; fallback = brand + Subaru-family vehicle term + 3 name words). Lessons: eBay keyword search returns junk (wrong vehicles, sneakers); genuine NEW parts rarely beat specialty stores (MAP pricing) — used/open-box is where eBay wins.
+- listings have a `condition` column; unique (part_id, seller_id, condition). UI shows amber badge for non-New. ingest-shopify edge function is DEPRECATED (old conflict target) — crawl-driver is the live crawler.
 - eBay Partner Network campaign ID: **5339155699** — wrap eBay URLs: `?mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339155699&toolid=10001&mkevt=1`.
-- Test snapshot of 25 parts: `sd_mq09jzgypdl91gnsd` in ebay_raw (may need matching into catalog).
+- Pipeline: ebay-ingest edge function (trigger/check/fetch w/ Bright Data) → ebay_raw → match_ebay_snapshot(). Cost ~1¢/part searched. NOT yet scheduled — scale/cadence decision pending with Abe.
 
 ## Analytics
 `events` table: pageview / search / click_buy with anonymous session ids. Purpose: build traffic stats for affiliate outreach to stores (most stores have no formal affiliate program — direct outreach with click data is the plan).

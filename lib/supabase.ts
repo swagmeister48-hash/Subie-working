@@ -22,7 +22,9 @@ export type Part = {
   brand: string | null;
   category: string | null;
   part_number: string | null;
+  color: string | null;
   seller_count: number;
+  discount: number;
   models: string[];
   year_min: number | null;
   year_max: number | null;
@@ -30,6 +32,8 @@ export type Part = {
 };
 
 export type SearchResult = { total: number; rows: Part[] };
+
+export type SortOption = "relevance" | "price_asc" | "price_desc" | "discount" | "name";
 
 export const PAGE_SIZE = 40;
 
@@ -39,6 +43,14 @@ export async function searchParts(opts: {
   category?: string;
   year?: number;
   multiOnly?: boolean;
+  brand?: string;
+  color?: string;
+  seller?: string;
+  condition?: string;
+  inStock?: boolean;
+  priceMin?: number;
+  priceMax?: number;
+  sort?: SortOption;
   offset?: number;
 }): Promise<SearchResult> {
   const { data, error } = await supabase.rpc("search_parts", {
@@ -47,6 +59,14 @@ export async function searchParts(opts: {
     p_category: opts.category ?? "",
     p_year: opts.year ?? 0,
     p_multi_only: opts.multiOnly ?? false,
+    p_brand: opts.brand ?? "",
+    p_color: opts.color ?? "",
+    p_seller: opts.seller ?? "",
+    p_condition: opts.condition ?? "",
+    p_in_stock: opts.inStock ?? false,
+    p_price_min: opts.priceMin ?? 0,
+    p_price_max: opts.priceMax ?? 0,
+    p_sort: opts.sort ?? "relevance",
     p_limit: PAGE_SIZE,
     p_offset: opts.offset ?? 0,
   });
@@ -77,13 +97,20 @@ export function track(type: "pageview" | "search" | "click_buy", data: Record<st
   }
 }
 
-export type Facets = { models: string[]; years: number[]; categories: string[] };
+export type Facets = {
+  models: string[];
+  years: number[];
+  categories: string[];
+  brands: string[];
+  colors: string[];
+  sellers: string[];
+};
 
 export async function getFacets(): Promise<Facets> {
   const { data, error } = await supabase.rpc("get_facets");
   if (error) {
     console.error("get_facets error:", error.message);
-    return { models: [], years: [], categories: [] };
+    return { models: [], years: [], categories: [], brands: [], colors: [], sellers: [] };
   }
   return data as Facets;
 }
