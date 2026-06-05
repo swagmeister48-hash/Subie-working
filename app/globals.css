@@ -127,6 +127,22 @@ button {
   cursor: pointer;
   padding: 0;
   margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.filter-group summary::before {
+  content: "▶";
+  display: inline-block;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  transform: rotate(0deg);
+}
+
+.filter-group[open] summary::before {
+  transform: rotate(90deg);
 }
 
 .filter-group[open] summary {
@@ -386,21 +402,27 @@ button {
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .chip span {
   opacity: 0.8;
+  font-size: 11px;
 }
 
 .chip.clear-all {
   border-color: rgba(46, 95, 232, 0.32);
   background: rgba(46, 95, 232, 0.1);
+  gap: 6px;
+  padding: 6px 12px;
 }
 
 .list {
