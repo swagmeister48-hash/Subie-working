@@ -214,6 +214,15 @@ export default function PartsBrowser() {
   ].filter(Boolean) as { label: string; key: string }[];
 
   const lastPage = Math.max(0, Math.ceil(total / PAGE_SIZE) - 1);
+  const showSkeleton = loading && rows.length === 0;
+  const skeletonCards = Array.from({ length: 6 }, (_, index) => (
+    <div className="skeleton-card" key={index}>
+      <div className="skeleton-line skeleton-heading" />
+      <div className="skeleton-line skeleton-sub" />
+      <div className="skeleton-line skeleton-row" />
+      <div className="skeleton-line skeleton-row short" />
+    </div>
+  ));
 
   return (
     <div className="browser-shell">
@@ -485,7 +494,7 @@ export default function PartsBrowser() {
         )}
 
         <div className="list">
-          {rows.map((p) => {
+          {showSkeleton ? skeletonCards : rows.map((p) => {
             const best = p.listings[0]?.total ?? 0;
             const save = p.listings.length > 1 ? p.listings[p.listings.length - 1].total - best : 0;
             const yearLabel =
