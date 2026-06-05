@@ -13,6 +13,7 @@ export type Listing = {
   total: number;
   url: string | null;
   in_stock: boolean;
+  condition?: string;
 };
 
 export type Part = {
@@ -54,6 +55,26 @@ export async function searchParts(opts: {
     return { total: 0, rows: [] };
   }
   return (data as SearchResult) ?? { total: 0, rows: [] };
+}
+
+// ---- anonymous analytics ----
+
+function sessionId(): string {
+  if (typeof window === "undefined") return "server";
+  let s = localStorage.getItem("pp_session");
+  if (!s) {
+    s = crypto.randomUUID();
+    localStorage.setItem("pp_session", s);
+  }
+  return s;
+}
+
+export function track(type: "pageview" | "search" | "click_buy", data: Record<string, unknown>) {
+  try {
+    void supabase.from("events").insert({ type, session_id: sessionId(), data });
+  } catch {
+    // analytics must never break the site
+  }
 }
 
 export type Facets = { models: string[]; years: number[]; categories: string[] };

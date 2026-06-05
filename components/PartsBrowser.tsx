@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   searchParts,
   getFacets,
+  track,
   PAGE_SIZE,
   type Part,
   type Facets,
@@ -31,6 +32,12 @@ export default function PartsBrowser() {
 
   useEffect(() => {
     getFacets().then(setFacets);
+    track("pageview", {
+      path: window.location.pathname,
+      referrer: document.referrer || null,
+      ua: navigator.userAgent,
+      screen: `${window.screen.width}x${window.screen.height}`,
+    });
   }, []);
 
   const run = useCallback(
@@ -40,6 +47,9 @@ export default function PartsBrowser() {
       setRows(res.rows);
       setTotal(res.total);
       setLoading(false);
+      if (q || model || cat || year) {
+        track("search", { q, model, category: cat, year, multiOnly, offset, results: res.total });
+      }
     },
     [q, model, cat, year, multiOnly]
   );
@@ -141,6 +151,9 @@ export default function PartsBrowser() {
                   <div className="seller">
                     {l.seller}
                     {sorted.length > 1 && i === 0 && <span className="badge">Best</span>}
+                    {l.condition && l.condition !== "New" && (
+                      <span className="badge used">{l.condition}</span>
+                    )}
                     {!l.in_stock && <span className="badge oos">Out of stock</span>}
                   </div>
                   <div className="price-cell">
@@ -152,7 +165,22 @@ export default function PartsBrowser() {
                     </div>
                     <button
                       className="buy"
-                      onClick={() => l.url && window.open(l.url, "_blank", "noopener")}
+                      onClick={() => {
+                        if (!l.url) return;
+                        track("click_buy", {
+                          part_id: p.id,
+                          part_name: p.name,
+                          brand: p.brand,
+                          part_number: p.part_number,
+                          seller: l.seller,
+                          price: l.price,
+                          total: l.total,
+                          best_in_list: sorted[0]?.seller === l.seller,
+                          seller_count: sorted.length,
+                          url: l.url,
+                        });
+                        window.open(l.url, "_blank", "noopener");
+                      }}
                       disabled={!l.url}
                     >
                       Buy now
