@@ -79,7 +79,10 @@ function resolveBanner(chassis: string, model: string) {
     headline = model;
     sub = "Subaru";
   }
-  return { src: `/cars/${slug}.jpg`, eyebrow, headline, sub };
+  // Most photos look best with the default focal point; the SK Forester sits low
+  // in a tall frame, so nudge its focus down to keep the car centered in the banner.
+  const pos = slug === "sk" ? "center 78%" : "center 60%";
+  return { src: `/cars/${slug}.jpg`, eyebrow, headline, sub, pos };
 }
 
 export default function PartsBrowser() {
@@ -508,7 +511,7 @@ export default function PartsBrowser() {
           <div className="brandbar">
             <a className="brand" href="/" aria-label="Subie home">
               <span className="brand-mark" aria-hidden>✦</span>
-              <span className="brand-name">SUBIE</span>
+              <span className="brand-name">SUBIEDEAL</span>
               <span className="brand-tag">subaru parts, compared</span>
             </a>
             <div className="header-stats">
@@ -536,7 +539,6 @@ export default function PartsBrowser() {
               spellCheck={false}
             />
           </div>
-          <p className="tagline">The best price, every time</p>
         </header>
 
         <section className={`banner${bannerError ? " banner-fallback" : ""}`}>
@@ -545,6 +547,7 @@ export default function PartsBrowser() {
               className="banner-img"
               src={banner.src}
               alt={`${banner.headline} Subaru`}
+              style={{ objectPosition: banner.pos }}
               onError={() => setBannerError(true)}
             />
           )}

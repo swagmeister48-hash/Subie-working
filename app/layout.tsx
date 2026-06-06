@@ -27,7 +27,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Subie — Subaru parts, the best price every time",
+  title: "SubieDeal — Subaru parts price comparison",
   description: "Compare Subaru part prices across 12 retailers and jump to the best deal.",
 };
 
