@@ -8,7 +8,7 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 ## Stack
 - **Frontend**: this folder — Next.js 15 (app router), plain CSS (no Tailwind), client-side search UI in `components/PartsBrowser.tsx`, Supabase reads via `lib/supabase.ts`.
 - **Database**: Supabase project `dbrakcmlwmaqsbgfswsc` ("Price Picker"). Use the Supabase MCP connector for ALL database work — Abe expects Claude to make DB changes directly.
-- **Hosting**: Vercel (NOT yet set up — parked until Abe says go). GitHub repo: swagmeister48-hash/Subie-working (Abe pushes; Claude prepares commands; sandbox cannot reach GitHub).
+- **Hosting**: LIVE on Vercel as "subiedeal" (deployed 2026-06-06). Already receiving real traffic from Instagram/Facebook/Google. GitHub repo: swagmeister48-hash/Subie-working (sandbox CAN push directly — earlier "cannot reach GitHub" note was stale).
 - **Scraping**: Supabase Edge Functions (sandbox cannot reach external sites; edge functions can).
 
 ## Database essentials
@@ -34,6 +34,8 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 
 ## Analytics
 `events` table: pageview / search / click_buy with anonymous session ids. Purpose: build traffic stats for affiliate outreach to stores (most stores have no formal affiliate program — direct outreach with click data is the plan).
+- Each event has an `env` column: `dev` (localhost/127.0.0.1, OR a browser with `pp_owner=1` in localStorage) vs `prod` (real visitors). Filter `where env = 'prod'` for real stats. Owner mode: visiting the live site with `?owner=1` sets the flag on that browser; `?owner=0` clears it (logic in `lib/supabase.ts`).
+- NEVER bulk-delete from `events` — it now holds real launch traffic (verify UA/referrer/search payloads before touching any row; real sessions show device UAs + social referrers, not headless/localhost).
 
 ## Catalog state (June 2026)
 ~131,600 parts, ~185k listings, 12 sellers, ~27,400 cross-seller matched. Old MVP benchmark was 16k — beaten. Some suspicious giant price spreads (Forced Performance turbos) worth auditing.
