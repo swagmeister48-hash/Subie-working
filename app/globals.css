@@ -125,12 +125,26 @@ button {
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
-  padding: 0;
-  margin-bottom: 14px;
+  /* Extend the clickable header to the full card so the WHOLE row toggles */
+  margin: -18px;
+  padding: 16px 18px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
   user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.filter-group[open] summary {
+  margin: -18px -18px 14px;
+  border-radius: 16px 16px 0 0;
+  color: var(--accent);
+}
+
+.filter-group summary:hover {
+  background: rgba(46, 95, 232, 0.1);
+  color: var(--accent);
 }
 
 .filter-group summary::before {
@@ -143,10 +157,6 @@ button {
 
 .filter-group[open] summary::before {
   transform: rotate(90deg);
-}
-
-.filter-group[open] summary {
-  color: var(--accent);
 }
 
 .filter-list {
@@ -302,6 +312,136 @@ button {
 .content {
   display: grid;
   gap: 24px;
+}
+
+/* --- Masthead: tagline + centered search ---------------------------------- */
+.masthead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 8px 0 2px;
+}
+
+.tagline {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.6vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.hero-search {
+  width: 100%;
+  max-width: 640px;
+}
+
+.hero-search input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  caret-color: var(--success);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  text-align: center;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-search input::placeholder {
+  color: var(--muted);
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+.hero-search input:focus {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px var(--success-soft);
+}
+
+/* --- Chassis / model banner ---------------------------------------------- */
+.banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  min-height: 250px;
+  display: flex;
+  align-items: flex-end;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background:
+    radial-gradient(circle at 26% 16%, rgba(46, 95, 232, 0.3), transparent 60%),
+    linear-gradient(120deg, var(--surface), var(--surface-2) 55%, var(--surface));
+}
+
+.banner-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 62%;
+}
+
+/* Blend the image edges back into the page background (#11151f) */
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, var(--surface) 0%, rgba(17, 21, 31, 0.1) 34%, rgba(17, 21, 31, 0.1) 66%, var(--surface) 100%),
+    linear-gradient(to top, var(--surface) 3%, rgba(17, 21, 31, 0.5) 36%, rgba(17, 21, 31, 0) 72%);
+}
+
+.banner-text {
+  position: relative;
+  z-index: 2;
+  padding: 26px 30px;
+}
+
+.banner-headline {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-shadow: 0 2px 26px rgba(0, 0, 0, 0.55);
+}
+
+.banner-sub {
+  margin: 8px 0 0;
+  color: var(--muted-strong);
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.65);
+}
+
+.banner-stats {
+  position: relative;
+  z-index: 2;
+  margin-left: auto;
+  display: flex;
+  gap: 24px;
+  padding: 26px 30px;
+}
+
+.banner-stats div {
+  text-align: right;
+}
+
+.banner-stats span {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.banner-stats p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .hero {
@@ -779,5 +919,17 @@ button {
 
   .hero-stats {
     gap: 10px;
+  }
+
+  .banner {
+    min-height: 190px;
+  }
+
+  .banner-stats {
+    display: none;
+  }
+
+  .banner-text {
+    padding: 20px 22px;
   }
 }

@@ -33,6 +33,58 @@ const SAVINGS_OPTIONS = [
   { label: "50%+", value: 50 },
 ];
 
+// --- Banner image resolution -------------------------------------------------
+// Every value below points at a file that actually exists in /public/cars,
+// so the banner never requests a missing image (the onError handler is just a
+// final safety net). Friendly generation labels are shown under the chassis code.
+const CHASSIS_LABEL: Record<string, string> = {
+  GC8: "1992–2000 Impreza",
+  GD: "2002–2007 WRX / STI",
+  GR: "2008–2014 WRX / STI",
+  VA: "2015–2021 WRX / STI",
+  VB: "2022+ WRX",
+  ZC6: "2013–2020 BRZ",
+  ZD8: "2022+ BRZ",
+  SF: "1997–2002 Forester",
+  SG: "2003–2008 Forester",
+  SH: "2009–2013 Forester",
+  SJ: "2014–2018 Forester",
+  SK: "2019+ Forester",
+};
+
+const CHASSIS_IMG: Record<string, string> = {
+  VA: "va", GD: "gd", GR: "gr", ZC6: "zc6", ZD8: "brz", VB: "wrx", GC8: "default",
+  GDB: "gd", GRB: "gr", GV: "gr", GVB: "gr", GG: "gr", ZN6: "zc6", ZN8: "brz",
+  SF: "forester", SF5: "forester", SG: "forester", SG5: "forester",
+  SH: "forester", SH5: "forester", SJ: "forester", SK: "forester",
+};
+
+const MODEL_IMG: Record<string, string> = {
+  WRX: "wrx", STI: "sti", BRZ: "brz", Forester: "forester", Impreza: "impreza", Outback: "outback",
+};
+
+function resolveBanner(chassis: string, model: string) {
+  let slug = "default";
+  let headline = "Every Subaru";
+  let sub = "12 retailers · one best price";
+  if (chassis && CHASSIS_IMG[chassis]) {
+    slug = CHASSIS_IMG[chassis];
+    headline = chassis;
+    sub = CHASSIS_LABEL[chassis] || "Subaru";
+  } else if (model && MODEL_IMG[model]) {
+    slug = MODEL_IMG[model];
+    headline = model;
+    sub = "Subaru";
+  } else if (chassis) {
+    headline = chassis;
+    sub = CHASSIS_LABEL[chassis] || "Subaru";
+  } else if (model) {
+    headline = model;
+    sub = "Subaru";
+  }
+  return { src: `/cars/${slug}.jpg`, headline, sub };
+}
+
 export default function PartsBrowser() {
   const [q, setQ] = useState("");
   const [model, setModel] = useState("");
@@ -51,6 +103,12 @@ export default function PartsBrowser() {
   const [multiOnly, setMultiOnly] = useState(true);
   const [page, setPage] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [bannerError, setBannerError] = useState(false);
+
+  const banner = resolveBanner(chassis, model);
+  useEffect(() => {
+    setBannerError(false);
+  }, [banner.src]);
 
   const [facets, setFacets] = useState<Facets>(EMPTY_FACETS);
   const [rows, setRows] = useState<Part[]>([]);
@@ -238,16 +296,6 @@ export default function PartsBrowser() {
         </div>
 
         <div className="filter-body">
-          <div className="filter-group search-group">
-            <label htmlFor="search">Search</label>
-            <input
-              id="search"
-              placeholder="Part, brand, number…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
-          </div>
-
           <details className="filter-group">
             <summary>Model</summary>
             <div className="filter-list">
@@ -433,19 +481,39 @@ export default function PartsBrowser() {
       </aside>
 
       <div className="content">
-        <div className="hero">
-          <div>
-            <p className="eyebrow">Performance dark Subaru catalog</p>
-            <h1>Compare Subaru part prices across 12 retailers</h1>
-            <p className="hero-copy">
-              Search hard-to-find Subaru parts, compare prices with transparent listings, and jump to the best deal in one clean view.
-            </p>
+        <header className="masthead">
+          <p className="tagline">The best price, every time</p>
+          <div className="hero-search">
+            <input
+              id="search"
+              type="search"
+              placeholder="Search part, brand, or number…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+            />
           </div>
+        </header>
 
-          <div className="hero-stats">
+        <section className={`banner${bannerError ? " banner-fallback" : ""}`}>
+          {!bannerError && (
+            <img
+              className="banner-img"
+              src={banner.src}
+              alt={`${banner.headline} Subaru`}
+              onError={() => setBannerError(true)}
+            />
+          )}
+          <div className="banner-overlay" />
+          <div className="banner-text">
+            <p className="banner-headline">{banner.headline}</p>
+            <p className="banner-sub">{banner.sub}</p>
+          </div>
+          <div className="banner-stats">
             <div>
               <span>{total ? total.toLocaleString() : "—"}</span>
-              <p>parts indexed</p>
+              <p>parts</p>
             </div>
             <div>
               <span>{facets.sellers.length || "—"}</span>
@@ -456,7 +524,7 @@ export default function PartsBrowser() {
               <p>categories</p>
             </div>
           </div>
-        </div>
+        </section>
 
         <div className="toolbar">
           <button className="filter-toggle" onClick={() => setSidebarOpen(true)}>
