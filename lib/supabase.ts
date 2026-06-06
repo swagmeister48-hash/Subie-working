@@ -110,19 +110,32 @@ function sessionId(): string {
   return s;
 }
 
+// Owner mode: visiting the live site with ?owner=1 persists a flag on this
+// browser so the owner's own visits are tagged "dev" and kept out of prod
+// analytics. ?owner=0 clears it. Runs once when the module loads in the browser.
+if (typeof window !== "undefined") {
+  try {
+    const owner = new URLSearchParams(window.location.search).get("owner");
+    if (owner === "1") localStorage.setItem("pp_owner", "1");
+    else if (owner === "0") localStorage.removeItem("pp_owner");
+  } catch {
+    // never break the site on URL/storage issues
+  }
+}
+
 export function track(type: "pageview" | "search" | "click_buy", data: Record<string, unknown>) {
   try {
+    const isOwnerOrLocal =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      localStorage.getItem("pp_owner") === "1";
     void supabase
       .from("events")
       .insert({
         type,
         session_id: sessionId(),
         data,
-        env:
-          typeof window !== "undefined" &&
-          (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-            ? "dev"
-            : "prod",
+        env: isOwnerOrLocal ? "dev" : "prod",
       })
       .then(() => {});
   } catch {
