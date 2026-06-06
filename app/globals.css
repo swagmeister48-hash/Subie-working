@@ -843,9 +843,35 @@ button {
     align-items: start;
   }
 
+  /* Stick the sidebar as the results scroll past, but cap it to the viewport
+     and let it scroll internally so its lower filters are always reachable. */
   .sidebar {
     position: sticky;
-    top: 22px;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(150, 168, 200, 0.32) transparent;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(150, 168, 200, 0.28);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .sidebar:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(150, 168, 200, 0.45);
   }
 
   .sidebar-close { display: none; }
