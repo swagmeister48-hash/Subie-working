@@ -515,7 +515,6 @@ export default function PartsBrowser() {
                 <span style={{ color: "#3f7dec" }}>SUBIE</span>
                 <span style={{ color: "#3cbf77" }}>DEAL</span>
               </span>
-              <span className="brand-tag">subaru parts, compared</span>
             </a>
             <div className="header-stats">
               <div>
