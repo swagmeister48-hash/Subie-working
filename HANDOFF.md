@@ -82,7 +82,11 @@ Every file below is from **Pexels** under the [Pexels License](https://www.pexel
 | `zd8.jpg` | Modified (lowered) Subaru BRZ — see note below | https://www.pexels.com/photo/subaru-brz-at-night-gas-station-stop-31768891/ |
 | `wrx.jpg` | Blue VA-gen WRX, front | https://www.pexels.com/photo/front-of-blue-subaru-impreza-wrx-16728010/ |
 | `sti.jpg` | Two WRX STIs at night | https://www.pexels.com/photo/black-and-white-subaru-wrx-cars-17158873/ |
-| `forester.jpg` | Black SH-gen Forester | https://www.pexels.com/photo/black-subaru-forester-19868891/ |
+| `forester.jpg` / `sh.jpg` | Black SH-gen Forester (2009–2013) | https://www.pexels.com/photo/black-subaru-forester-19868891/ |
+| `sf.jpg` | Green SF-gen Forester (1997–2002), cropped from a 2-car shot | https://www.pexels.com/photo/two-subaru-suvs-parked-outdoors-in-nature-28577509/ |
+| `sg.jpg` | White SG-gen Forester STI (2003–2008) | https://www.pexels.com/photo/white-subaru-forester-in-north-carolina-outdoors-30454655/ |
+| `sj.jpg` | Silver SJ-gen Forester (2014–2018) | https://www.pexels.com/photo/silver-suv-parked-by-the-baltic-sea-in-estonia-34529318/ |
+| `sk.jpg` | Gray SK-gen Forester (2019+), snowy mountains | https://www.pexels.com/photo/subaru-car-with-snowy-mountain-backdrop-31978126/ |
 | `impreza.jpg` | White GD-gen Impreza WRX STI | https://www.pexels.com/photo/white-modified-subaru-impreza-wrx-sti-9661391/ |
 | `outback.jpg` | Modern Outback off-road | https://www.pexels.com/photo/subaru-outback-in-mud-15928390/ |
 
@@ -93,7 +97,8 @@ Every file below is from **Pexels** under the [Pexels License](https://www.pexel
 
 ### How the banner picks an image (`resolveBanner` in `components/PartsBrowser.tsx`)
 1. **Active chassis** → its mapped image: VA→`va`, GD→`gd`, GR→`gr`, ZC6→`zc6`, ZD8→`zd8`,
-   VB→`wrx`, GC8→`default`, and all Forester chassis (SF/SG/SH/SJ/SK)→`forester`.
+   VB→`wrx`, GC8→`default`, and each Forester generation to its own photo:
+   SF→`sf`, SG→`sg`, SH→`sh`, SJ→`sj`, SK→`sk`.
 2. Else **active model** → WRX→`wrx`, STI→`sti`, BRZ→`brz`, Forester→`forester`,
    Impreza→`impreza`, Outback→`outback`.
 3. Else → `default.jpg` (the rally car), headline "For enthusiasts and professionals."

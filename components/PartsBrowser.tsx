@@ -55,8 +55,8 @@ const CHASSIS_LABEL: Record<string, string> = {
 const CHASSIS_IMG: Record<string, string> = {
   VA: "va", GD: "gd", GR: "gr", ZC6: "zc6", ZD8: "zd8", VB: "wrx", GC8: "default",
   GDB: "gd", GRB: "gr", GV: "gr", GVB: "gr", GG: "gr", ZN6: "zc6", ZN8: "zd8",
-  SF: "forester", SF5: "forester", SG: "forester", SG5: "forester",
-  SH: "forester", SH5: "forester", SJ: "forester", SK: "forester",
+  SF: "sf", SF5: "sf", SG: "sg", SG5: "sg",
+  SH: "sh", SH5: "sh", SJ: "sj", SK: "sk",
 };
 
 const MODEL_IMG: Record<string, string> = {
