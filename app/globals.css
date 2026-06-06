@@ -401,6 +401,15 @@ button {
   border-color: rgba(46, 95, 232, 0.5);
 }
 
+/* Options that would yield zero results given the other active filters. */
+.pill.dim {
+  opacity: 0.38;
+}
+
+.pill.dim:hover {
+  opacity: 0.7;
+}
+
 .pill span {
   color: var(--muted);
   font-family: var(--font-mono);

@@ -4,10 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   searchParts,
   getFacets,
+  getFacetCounts,
   track,
   PAGE_SIZE,
+  EMPTY_FACET_COUNTS,
   type Part,
   type Facets,
+  type FacetCounts,
   type SortOption,
 } from "@/lib/supabase";
 
@@ -85,6 +88,17 @@ function resolveBanner(chassis: string, model: string) {
   return { src: `/cars/${slug}.jpg`, eyebrow, headline, sub, pos };
 }
 
+// Live faceted counts: once a group's counts have loaded, show the live number
+// (0 if the option is absent); before they arrive, fall back to the static count.
+function liveCount(group: Record<string, number>, value: string, fallback: number) {
+  return Object.keys(group).length > 0 ? group[value] ?? 0 : fallback;
+}
+
+// Dim an option that would yield zero results — unless it's the one selected.
+function isDimmed(group: Record<string, number>, value: string, selected: string) {
+  return Object.keys(group).length > 0 && (group[value] ?? 0) === 0 && value !== selected;
+}
+
 export default function PartsBrowser() {
   const [q, setQ] = useState("");
   const [model, setModel] = useState("");
@@ -112,12 +126,14 @@ export default function PartsBrowser() {
   }, [banner.src]);
 
   const [facets, setFacets] = useState<Facets>(EMPTY_FACETS);
+  const [facetCounts, setFacetCounts] = useState<FacetCounts>(EMPTY_FACET_COUNTS);
   const [rows, setRows] = useState<Part[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firstLoad = useRef(true);
+  const countsSeq = useRef(0);
 
   useEffect(() => {
     getFacets().then(setFacets);
@@ -156,6 +172,13 @@ export default function PartsBrowser() {
         sort,
         offset,
       };
+
+      // Live faceted counts run in parallel — never block the results on them.
+      // The sequence guard drops a stale response that resolves after a newer one.
+      const seq = ++countsSeq.current;
+      getFacetCounts(opts).then((counts) => {
+        if (seq === countsSeq.current) setFacetCounts(counts);
+      });
 
       // A cold-cache query can occasionally trip the DB statement timeout on the
       // first hit; retry a couple of times (the warmed retry succeeds) so the
@@ -346,11 +369,11 @@ export default function PartsBrowser() {
                 <button
                   key={item.v}
                   type="button"
-                  className={item.v === chassis ? "pill active" : "pill"}
+                  className={`pill${item.v === chassis ? " active" : ""}${isDimmed(facetCounts.chassis, item.v, chassis) ? " dim" : ""}`}
                   onClick={() => setChassis(item.v === chassis ? "" : item.v)}
                 >
                   {item.v}
-                  <span>{item.n}</span>
+                  <span>{liveCount(facetCounts.chassis, item.v, item.n)}</span>
                 </button>
               ))}
             </div>
@@ -387,11 +410,11 @@ export default function PartsBrowser() {
                 <button
                   key={item.v}
                   type="button"
-                  className={item.v === cat ? "pill active" : "pill"}
+                  className={`pill${item.v === cat ? " active" : ""}${isDimmed(facetCounts.categories, item.v, cat) ? " dim" : ""}`}
                   onClick={() => setCat(item.v === cat ? "" : item.v)}
                 >
                   {item.v}
-                  <span>{item.n}</span>
+                  <span>{liveCount(facetCounts.categories, item.v, item.n)}</span>
                 </button>
               ))}
             </div>
@@ -404,11 +427,11 @@ export default function PartsBrowser() {
                 <button
                   key={item.v}
                   type="button"
-                  className={item.v === brand ? "pill active" : "pill"}
+                  className={`pill${item.v === brand ? " active" : ""}${isDimmed(facetCounts.brands, item.v, brand) ? " dim" : ""}`}
                   onClick={() => setBrand(item.v === brand ? "" : item.v)}
                 >
                   {item.v}
-                  <span>{item.n}</span>
+                  <span>{liveCount(facetCounts.brands, item.v, item.n)}</span>
                 </button>
               ))}
             </div>
@@ -421,11 +444,11 @@ export default function PartsBrowser() {
                 <button
                   key={item.v}
                   type="button"
-                  className={item.v === color ? "pill active" : "pill"}
+                  className={`pill${item.v === color ? " active" : ""}${isDimmed(facetCounts.colors, item.v, color) ? " dim" : ""}`}
                   onClick={() => setColor(item.v === color ? "" : item.v)}
                 >
                   {item.v}
-                  <span>{item.n}</span>
+                  <span>{liveCount(facetCounts.colors, item.v, item.n)}</span>
                 </button>
               ))}
             </div>

@@ -138,3 +138,64 @@ export async function getFacets(): Promise<Facets> {
   }
   return data as Facets;
 }
+
+// Live faceted counts: for the current selection, how many parts each option in
+// Category / Chassis / Brand / Color would yield given the OTHER active filters.
+export type FacetCounts = {
+  categories: Record<string, number>;
+  chassis: Record<string, number>;
+  brands: Record<string, number>;
+  colors: Record<string, number>;
+};
+
+export const EMPTY_FACET_COUNTS: FacetCounts = {
+  categories: {},
+  chassis: {},
+  brands: {},
+  colors: {},
+};
+
+export async function getFacetCounts(opts: {
+  q?: string;
+  model?: string;
+  category?: string;
+  yearFrom?: number;
+  yearTo?: number;
+  multiOnly?: boolean;
+  brand?: string;
+  color?: string;
+  seller?: string;
+  chassis?: string;
+  inStock?: boolean;
+  priceMin?: number;
+  priceMax?: number;
+  minSavePct?: number;
+}): Promise<FacetCounts> {
+  const { data, error } = await supabase.rpc("get_facet_counts", {
+    q: opts.q ?? "",
+    p_model: opts.model ?? "",
+    p_category: opts.category ?? "",
+    p_year_from: opts.yearFrom ?? 0,
+    p_year_to: opts.yearTo ?? 0,
+    p_multi_only: opts.multiOnly ?? false,
+    p_brand: opts.brand ?? "",
+    p_color: opts.color ?? "",
+    p_seller: opts.seller ?? "",
+    p_chassis: opts.chassis ?? "",
+    p_in_stock: opts.inStock ?? false,
+    p_price_min: opts.priceMin ?? 0,
+    p_price_max: opts.priceMax ?? 0,
+    p_min_save_pct: opts.minSavePct ?? 0,
+  });
+  if (error) {
+    console.error("get_facet_counts error:", error.message);
+    return { categories: {}, chassis: {}, brands: {}, colors: {} };
+  }
+  const d = (data ?? {}) as Partial<FacetCounts>;
+  return {
+    categories: d.categories ?? {},
+    chassis: d.chassis ?? {},
+    brands: d.brands ?? {},
+    colors: d.colors ?? {},
+  };
+}
