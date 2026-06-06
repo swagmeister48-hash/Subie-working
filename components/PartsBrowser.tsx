@@ -511,7 +511,10 @@ export default function PartsBrowser() {
           <div className="brandbar">
             <a className="brand" href="/" aria-label="Subie home">
               <span className="brand-mark" aria-hidden>✦</span>
-              <span className="brand-name">SUBIEDEAL</span>
+              <span className="brand-name">
+                <span style={{ color: "#3f7dec" }}>SUBIE</span>
+                <span style={{ color: "#3cbf77" }}>DEAL</span>
+              </span>
               <span className="brand-tag">subaru parts, compared</span>
             </a>
             <div className="header-stats">
