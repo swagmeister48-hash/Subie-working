@@ -1,6 +1,6 @@
 # Subie — Handoff / Project State
 
-_Last updated: 2026-06-05_
+_Last updated: 2026-06-06_
 
 ## Project state (current)
 
@@ -16,17 +16,43 @@ _Last updated: 2026-06-05_
 - **Nightly maintenance** auto-runs merge SKUs / categorize / color / chassis / stats / `ANALYZE`.
 - **Catalog:** ~136k parts, ~28k cross-shoppable, 12 sellers.
 
+#### First-load performance fix (2026-06-06)
+- **Symptom:** the default catalog showed empty on first paint; applying then clearing any
+  filter made results appear.
+- **Root cause:** the default `search_parts` query took ~5s even warm because the planner
+  chose a full Seq Scan on the wide `parts` table (Supabase's default `random_page_cost=4`
+  is wrong for SSD). Cold, it exceeded the anon statement timeout; the error was swallowed
+  and rendered as "0 results". A warmed retry (after a filter) then succeeded.
+- **Fix:** migration `search_parts_ssd_planner_costs` scopes `random_page_cost = 1.1` and
+  `work_mem = '64MB'` to the `search_parts` function only (no global impact). It now picks
+  the PK index plan: **~5s → ~0.3s**. `ALTER FUNCTION` invalidates cached plans so PostgREST
+  backends replan automatically.
+- **Belt-and-suspenders:** the client (`searchParts` + `run()`) now distinguishes a real
+  error from genuinely-empty results and retries a slow/cold query up to 2× with backoff,
+  and the first paint fires immediately (not behind the debounce timer). A failed load shows
+  a "Try again" message instead of a misleading "No parts match".
+
 ### Frontend (builds clean)
-- Dark theme, Inter font.
-- Sidebar filters with rotating chevrons + counts; **entire filter header row is click-to-toggle** with hover state.
-- Compact filter chips.
-- Performance green (`#3cbf77`) on the Best badge / Buy buttons / savings text; blue (`#2e5fe8`) accent for general UI.
-- Filter groups collapsed by default.
-- Homepage loads the default catalog with a skeleton loader.
-- Analytics `track()` (pageview / search / click_buy) wired and fixed.
-- **Tagline:** "The best price, every time".
-- **Centered header search bar** — sits directly on the page (no surface box), ~4px corners, monospace font, green caret; wired to the existing debounced search state.
-- **Chassis/model banner** — shows a Subaru image chosen from the active chassis/model filter, the image extended and gradient-blended into the page background (`#11151f`) at the edges with the model name overlaid; falls back to a styled gradient + text when no image file exists (no broken-image icon). Default Subaru banner when nothing is filtered.
+- **Type system:** Space Grotesk (display/headings + wordmark), Manrope (body), JetBrains
+  Mono (search box, part numbers, prices) — loaded via `next/font/google` in `app/layout.tsx`
+  as `--font-display` / `--font-sans` / `--font-mono`. (Replaced Inter-everywhere.)
+- **Brand bar:** asymmetric header — `✦ SUBIE` wordmark left, live **parts / retailers**
+  stats right (categories stat removed). Replaces the old centered-everything stack.
+- **Search:** prominent centered field with a `⌕` glyph, box-less, ~4px corners, mono font,
+  green caret; placeholder "input part number, name, etc"; wired to the debounced search.
+  Small uppercase mono tagline "The best price, every time" beneath it.
+- **Chassis/model banner** — Subaru image chosen from the active chassis/model filter, edges
+  gradient-blended into the page background (`#11151f`), with a small green eyebrow
+  (Chassis/Model) + display-font headline + year/model sub. Default (no filter) banner reads
+  **"For enthusiasts and professionals."** Graceful gradient+text fallback if an image is
+  missing (no broken-image icon).
+- **Filters:** compact wrapping chips (not full-width stacked pills); the **entire header row
+  is click-to-toggle** with hover + rotating chevron; groups collapsed by default.
+- **Results:** stronger hierarchy — display-font part names, mono part-numbers/prices, and the
+  **best (cheapest) listing row is highlighted green**. Performance green (`#3cbf77`) on Best
+  badge / Buy buttons / savings; blue (`#2e5fe8`) accent for general UI.
+- Homepage loads the default catalog with a skeleton loader; analytics `track()`
+  (pageview / search / click_buy) wired.
 
 ### Hosting / repo
 - **Vercel:** not set up yet (parked until Abe says go).
@@ -53,21 +79,25 @@ Every file below is from **Pexels** under the [Pexels License](https://www.pexel
 | `gd.jpg` | Blue GD-gen WRX STI (2002–2007) | https://www.pexels.com/photo/high-speed-blue-subaru-wrx-sti-on-highway-30112449/ |
 | `gr.jpg` | Orange GR-gen Impreza WRX hatch (2008–2014) | https://www.pexels.com/photo/back-view-of-orange-subaru-impreza-wrx-18501353/ |
 | `zc6.jpg` / `brz.jpg` | White 1st-gen Subaru BRZ (ZC6) | https://www.pexels.com/photo/white-subaru-brz-sports-car-18611668/ |
+| `zd8.jpg` | Modified (lowered) Subaru BRZ — see note below | https://www.pexels.com/photo/subaru-brz-at-night-gas-station-stop-31768891/ |
 | `wrx.jpg` | Blue VA-gen WRX, front | https://www.pexels.com/photo/front-of-blue-subaru-impreza-wrx-16728010/ |
 | `sti.jpg` | Two WRX STIs at night | https://www.pexels.com/photo/black-and-white-subaru-wrx-cars-17158873/ |
 | `forester.jpg` | Black SH-gen Forester | https://www.pexels.com/photo/black-subaru-forester-19868891/ |
 | `impreza.jpg` | White GD-gen Impreza WRX STI | https://www.pexels.com/photo/white-modified-subaru-impreza-wrx-sti-9661391/ |
 | `outback.jpg` | Modern Outback off-road | https://www.pexels.com/photo/subaru-outback-in-mud-15928390/ |
 
+> **Note on `zd8.jpg`:** a free-licensed photo of a *true* 2nd-gen ZD8 BRZ wasn't available
+> on Unsplash / Pexels / Pixabay, so this is the closest genuine Subaru BRZ (a clean, lowered
+> 1st-gen-facelift build). It's a deliberate, brand-accurate stand-in — swap it if a real ZD8
+> turns up. Two candidates were rejected during sourcing for being Toyota 86 twins, not Subarus.
+
 ### How the banner picks an image (`resolveBanner` in `components/PartsBrowser.tsx`)
-1. **Active chassis** → its mapped image: VA→`va`, GD→`gd`, GR→`gr`, ZC6→`zc6`, ZD8→`brz`,
+1. **Active chassis** → its mapped image: VA→`va`, GD→`gd`, GR→`gr`, ZC6→`zc6`, ZD8→`zd8`,
    VB→`wrx`, GC8→`default`, and all Forester chassis (SF/SG/SH/SJ/SK)→`forester`.
 2. Else **active model** → WRX→`wrx`, STI→`sti`, BRZ→`brz`, Forester→`forester`,
    Impreza→`impreza`, Outback→`outback`.
-3. Else → `default.jpg` (the rally car).
+3. Else → `default.jpg` (the rally car), headline "For enthusiasts and professionals."
 
 Every mapping points at a file that exists, so the banner never requests a missing image.
-The overlaid headline is the chassis code (with a friendly year/model label) or the model
-name; the image edges gradient-blend into the page background (`#11151f`). If an image ever
-fails to load, an `onError` handler hides it and the styled gradient + text remain (no broken
-icon).
+If an image ever fails to load, an `onError` handler hides it and the styled gradient + text
+remain (no broken-image icon).

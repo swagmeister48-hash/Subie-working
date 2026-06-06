@@ -1,12 +1,34 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+// Display / headings — characterful grotesk with a motorsport-gauge personality.
+const display = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
+// Body — clean, highly readable, modern (not plain Inter-everywhere).
+const sans = Manrope({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+// Mono — part numbers, the search box, prices.
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Subaru Parts Price Comparison",
-  description: "Compare car part prices across retailers.",
+  title: "Subie — Subaru parts, the best price every time",
+  description: "Compare Subaru part prices across 12 retailers and jump to the best deal.",
 };
 
 export default function RootLayout({
@@ -15,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.className}>
+    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

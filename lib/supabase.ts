@@ -44,7 +44,7 @@ export type Part = {
   listings: Listing[];
 };
 
-export type SearchResult = { total: number; rows: Part[] };
+export type SearchResult = { total: number; rows: Part[]; error?: boolean };
 
 export type SortOption =
   | "relevance"
@@ -95,7 +95,7 @@ export async function searchParts(opts: {
   });
   if (error) {
     console.error("search_parts error:", error.message);
-    return { total: 0, rows: [] };
+    return { total: 0, rows: [], error: true };
   }
   return (data as SearchResult) ?? { total: 0, rows: [] };
 }

@@ -53,8 +53,8 @@ const CHASSIS_LABEL: Record<string, string> = {
 };
 
 const CHASSIS_IMG: Record<string, string> = {
-  VA: "va", GD: "gd", GR: "gr", ZC6: "zc6", ZD8: "brz", VB: "wrx", GC8: "default",
-  GDB: "gd", GRB: "gr", GV: "gr", GVB: "gr", GG: "gr", ZN6: "zc6", ZN8: "brz",
+  VA: "va", GD: "gd", GR: "gr", ZC6: "zc6", ZD8: "zd8", VB: "wrx", GC8: "default",
+  GDB: "gd", GRB: "gr", GV: "gr", GVB: "gr", GG: "gr", ZN6: "zc6", ZN8: "zd8",
   SF: "forester", SF5: "forester", SG: "forester", SG5: "forester",
   SH: "forester", SH5: "forester", SJ: "forester", SK: "forester",
 };
@@ -65,24 +65,21 @@ const MODEL_IMG: Record<string, string> = {
 
 function resolveBanner(chassis: string, model: string) {
   let slug = "default";
-  let headline = "Every Subaru";
+  let eyebrow = "";
+  let headline = "For enthusiasts and professionals.";
   let sub = "12 retailers · one best price";
-  if (chassis && CHASSIS_IMG[chassis]) {
-    slug = CHASSIS_IMG[chassis];
-    headline = chassis;
-    sub = CHASSIS_LABEL[chassis] || "Subaru";
-  } else if (model && MODEL_IMG[model]) {
-    slug = MODEL_IMG[model];
-    headline = model;
-    sub = "Subaru";
-  } else if (chassis) {
+  if (chassis) {
+    slug = CHASSIS_IMG[chassis] || "default";
+    eyebrow = "Chassis";
     headline = chassis;
     sub = CHASSIS_LABEL[chassis] || "Subaru";
   } else if (model) {
+    slug = MODEL_IMG[model] || "default";
+    eyebrow = "Model";
     headline = model;
     sub = "Subaru";
   }
-  return { src: `/cars/${slug}.jpg`, headline, sub };
+  return { src: `/cars/${slug}.jpg`, eyebrow, headline, sub };
 }
 
 export default function PartsBrowser() {
@@ -104,6 +101,7 @@ export default function PartsBrowser() {
   const [page, setPage] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bannerError, setBannerError] = useState(false);
+  const [errored, setErrored] = useState(false);
 
   const banner = resolveBanner(chassis, model);
   useEffect(() => {
@@ -116,6 +114,7 @@ export default function PartsBrowser() {
   const [loading, setLoading] = useState(true);
 
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const firstLoad = useRef(true);
 
   useEffect(() => {
     getFacets().then(setFacets);
@@ -135,7 +134,8 @@ export default function PartsBrowser() {
   const run = useCallback(
     async (offset: number) => {
       setLoading(true);
-      const res = await searchParts({
+      setErrored(false);
+      const opts = {
         q,
         model,
         category: cat,
@@ -152,7 +152,22 @@ export default function PartsBrowser() {
         minSavePct: savePct,
         sort,
         offset,
-      });
+      };
+
+      // A cold-cache query can occasionally trip the DB statement timeout on the
+      // first hit; retry a couple of times (the warmed retry succeeds) so the
+      // catalog reliably appears instead of a misleading "no results" state.
+      let res = await searchParts(opts);
+      for (let attempt = 1; attempt <= 2 && res.error; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+        res = await searchParts(opts);
+      }
+
+      if (res.error) {
+        setErrored(true);
+        setLoading(false);
+        return;
+      }
 
       setRows(res.rows);
       setTotal(res.total);
@@ -184,6 +199,14 @@ export default function PartsBrowser() {
   );
 
   useEffect(() => {
+    // First paint: load the default catalog immediately so it never depends on
+    // the debounce timer (which a re-render / StrictMode cleanup could cancel).
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      run(0);
+      return;
+    }
+    // Subsequent filter/search changes: debounce.
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(() => {
       setPage(0);
@@ -482,18 +505,38 @@ export default function PartsBrowser() {
 
       <div className="content">
         <header className="masthead">
-          <p className="tagline">The best price, every time</p>
+          <div className="brandbar">
+            <a className="brand" href="/" aria-label="Subie home">
+              <span className="brand-mark" aria-hidden>✦</span>
+              <span className="brand-name">SUBIE</span>
+              <span className="brand-tag">subaru parts, compared</span>
+            </a>
+            <div className="header-stats">
+              <div>
+                <span>{total ? total.toLocaleString() : "—"}</span>
+                <p>parts</p>
+              </div>
+              <span className="header-stats-divider" aria-hidden />
+              <div>
+                <span>{facets.sellers.length || "—"}</span>
+                <p>retailers</p>
+              </div>
+            </div>
+          </div>
+
           <div className="hero-search">
+            <span className="search-glyph" aria-hidden>⌕</span>
             <input
               id="search"
               type="search"
-              placeholder="Search part, brand, or number…"
+              placeholder="input part number, name, etc"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               autoComplete="off"
               spellCheck={false}
             />
           </div>
+          <p className="tagline">The best price, every time</p>
         </header>
 
         <section className={`banner${bannerError ? " banner-fallback" : ""}`}>
@@ -507,22 +550,9 @@ export default function PartsBrowser() {
           )}
           <div className="banner-overlay" />
           <div className="banner-text">
+            {banner.eyebrow && <p className="banner-eyebrow">{banner.eyebrow}</p>}
             <p className="banner-headline">{banner.headline}</p>
             <p className="banner-sub">{banner.sub}</p>
-          </div>
-          <div className="banner-stats">
-            <div>
-              <span>{total ? total.toLocaleString() : "—"}</span>
-              <p>parts</p>
-            </div>
-            <div>
-              <span>{facets.sellers.length || "—"}</span>
-              <p>retailers</p>
-            </div>
-            <div>
-              <span>{facets.categories.length || "—"}</span>
-              <p>categories</p>
-            </div>
           </div>
         </section>
 
@@ -637,7 +667,17 @@ export default function PartsBrowser() {
               </div>
             );
           })}
-          {!loading && rows.length === 0 && <div className="empty">No parts match those filters.</div>}
+          {!loading && errored && (
+            <div className="empty">
+              Couldn’t load the catalog just now.{" "}
+              <button type="button" className="retry-link" onClick={() => run(page * PAGE_SIZE)}>
+                Try again
+              </button>
+            </div>
+          )}
+          {!loading && !errored && rows.length === 0 && (
+            <div className="empty">No parts match those filters.</div>
+          )}
         </div>
 
         {total > PAGE_SIZE && (
