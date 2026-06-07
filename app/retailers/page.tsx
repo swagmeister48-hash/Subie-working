@@ -6,11 +6,12 @@ import { track } from "@/lib/supabase";
 
 // tone drives the small coloured indicator: home = Canadian store,
 // yes = ships to Canada, quote = ships by quote, no = US only.
-type ShipTone = "home" | "yes" | "quote" | "no";
+type ShipTone = "home" | "yes" | "quote" | "check" | "no";
 type Retailer = { name: string; url: string; count: string; ship: { text: string; tone: ShipTone } };
 
 const SHIPS = { text: "Ships to Canada (duties/brokerage on delivery)", tone: "yes" } as const;
 const QUOTE = { text: "Ships to Canada by emailed quote", tone: "quote" } as const;
+const CHECK = { text: "Ships to Canada (check at checkout)", tone: "check" } as const;
 
 // Hardcoded for now (rounded live-DB listing counts, biggest catalog first).
 const RETAILERS: Retailer[] = [
@@ -21,8 +22,10 @@ const RETAILERS: Retailer[] = [
   { name: "RallySport Direct", url: "https://www.rallysportdirect.com", count: "14,100+", ship: { text: "US only (check at checkout)", tone: "no" } },
   { name: "Subie Supply Co", url: "https://subiesupplyco.ca", count: "12,800+", ship: { text: "🇨🇦 Canadian store (prices shown on SubieDeal are their USD prices)", tone: "home" } },
   { name: "SubiSpeed", url: "https://www.subispeed.com", count: "9,300+", ship: SHIPS },
+  { name: "Flatirons Tuning", url: "https://www.flatironstuning.com", count: "8,800+", ship: CHECK },
   { name: "FastWRX", url: "https://www.fastwrx.com", count: "6,300+", ship: SHIPS },
   { name: "New Provisions Racing", url: "https://www.newprovisionsracing.com", count: "5,700+", ship: SHIPS },
+  { name: "SMY Performance", url: "https://smyperformance.com", count: "3,600+", ship: CHECK },
   { name: "FT86 Speed Factory", url: "https://www.ft86speedfactory.com", count: "3,200+", ship: SHIPS },
   { name: "GrimmSpeed", url: "https://www.grimmspeed.com", count: "440+", ship: SHIPS },
   { name: "RaceComp Engineering", url: "https://www.racecompengineering.com", count: "85+", ship: QUOTE },
@@ -57,7 +60,7 @@ export default function RetailersPage() {
 
         <section className="retailers-head">
           <p className="banner-eyebrow">Our retailers</p>
-          <h1 className="retailers-title">12 stores, one best price</h1>
+          <h1 className="retailers-title">14 stores, one best price</h1>
           <p className="retailers-intro">
             Every price on SubieDeal comes from one of these stores. We link you
             straight to them — no markups, no middleman.

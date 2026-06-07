@@ -1,7 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
+
+// Layout effect that no-ops cleanly during SSR (avoids the useLayoutEffect warning).
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import {
   searchParts,
   getFacets,
@@ -71,7 +74,7 @@ function resolveBanner(chassis: string, model: string) {
   let slug = "default";
   let eyebrow = "";
   let headline = "For enthusiasts and professionals.";
-  let sub = "12 retailers · one best price";
+  let sub = "14 retailers and counting!";
   if (chassis) {
     slug = CHASSIS_IMG[chassis] || "default";
     eyebrow = "Chassis";
@@ -125,6 +128,27 @@ export default function PartsBrowser() {
   useEffect(() => {
     setBannerError(false);
   }, [banner.src]);
+
+  // Keep the banner headline on a single line: measure it and shrink the font
+  // only when the text would overflow its box (so short chassis headlines stay
+  // big and the long default headline never wraps on narrow screens).
+  const headlineRef = useRef<HTMLParagraphElement>(null);
+  useIsoLayoutEffect(() => {
+    const el = headlineRef.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = "";
+      const avail = el.clientWidth;
+      const needed = el.scrollWidth;
+      if (avail > 0 && needed > avail) {
+        const base = parseFloat(getComputedStyle(el).fontSize);
+        el.style.fontSize = `${Math.max(13, Math.floor((base * avail) / needed * 0.985))}px`;
+      }
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [banner.headline]);
 
   const [facets, setFacets] = useState<Facets>(EMPTY_FACETS);
   const [facetCounts, setFacetCounts] = useState<FacetCounts>(EMPTY_FACET_COUNTS);
@@ -591,8 +615,16 @@ export default function PartsBrowser() {
           )}
           <div className="banner-overlay" />
           <div className="banner-text">
-            {banner.eyebrow && <p className="banner-eyebrow">{banner.eyebrow}</p>}
-            <p className="banner-headline">{banner.headline}</p>
+            <p className="banner-headline" ref={headlineRef}>
+              {!chassis && !model ? (
+                <>
+                  For <span style={{ color: "#3f7dec" }}>enthusiasts</span> and{" "}
+                  <span style={{ color: "#3cbf77" }}>professionals</span>.
+                </>
+              ) : (
+                banner.headline
+              )}
+            </p>
             {!chassis && !model ? (
               <Link className="banner-sub banner-sub-link" href="/retailers">
                 {banner.sub}
@@ -737,7 +769,7 @@ export default function PartsBrowser() {
 
         <footer className="site-footer">
           <Link className="footer-link" href="/retailers">
-            The 12 retailers we compare →
+            The 14 retailers we compare →
           </Link>
         </footer>
       </div>
