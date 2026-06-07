@@ -60,6 +60,11 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 - `search_parts` and `get_facets` are SECURITY DEFINER; test query performance as the anon role, not as owner.
 - After any large data churn, run `ANALYZE` on `parts`/`listings`/`fitments`/`part_stats`.
 
+- Tied prices (very common — MAP pricing): listings order is total asc, then in-stock first, then a daily-rotating hash so no store permanently owns the top spot. Don't "simplify" this back to bare `order by total` — it silently biases one seller.
+- MAGENTO STORES LIVE (June 2026): SMY Performance + Flatirons Tuning crawled via edge function `crawl-magento` (Magento GraphQL, two dialects: SMY = price_range/.html URLs, Flatirons = price.regularPrice/no URL suffix). Uses crawl_state id=2 (Shopify driver owns id=1), same Subaru-only filter, parts inserted with ignoreDuplicates (never overwrites Shopify metadata), brand inferred from facet brand list. Flatirons "*OPEN BOX*" items get condition 'Open Box'. Nightly cron `nightly-magento-crawl` 06:00 UTC. Catalog now 14 sellers. NOTE: /retailers page + "12 retailers" banner copy need updating to 14.
+
+- QUALITY AUDIT (June 2026): deleted 113 non-parts (gift cards, shipping protection, "pick up in store") and 533 "$9,999.00 call-for-price" placeholder listings (Rays special-order wheels etc. — exactly 9999.00 only; $9,999.99 IAG engines are real). refresh_part_stats() now strips total=9999.00 nightly since crawls re-add them. SMY case-quantity fluids (Motul etc. at ~12x bottle price under same SKU) are real prices left in place — price_ceiling already hides them from comparisons. Magento crawler v3: space-form foreign names (Focus RS / Golf R / MK7) added to FOREIGN_RE; products without url_key link to the store's /catalogsearch/result/?q=SKU page.
+
 ## Conventions
 - **After every code change, verify functionality with Abe via a "verify block"**: a short console-style summary of what Claude tested (DB queries, timings, counts) plus 1-2 clicks for Abe with the exact expected result.
 - Sample/seed SQL files in parent folder's `setup/` are historical — DB is live, don't re-run them.
