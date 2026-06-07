@@ -1,6 +1,6 @@
 # Subie — Handoff / Project State
 
-_Last updated: 2026-06-06_
+_Last updated: 2026-06-07_
 
 ## Project state (current)
 
@@ -55,8 +55,26 @@ _Last updated: 2026-06-06_
   (pageview / search / click_buy) wired.
 
 ### Hosting / repo
-- **Vercel:** not set up yet (parked until Abe says go).
-- **GitHub:** `swagmeister48-hash/Subie-working`. Abe pushes; Claude prepares commands.
+- **Vercel:** LIVE as "subiedeal" — every push to `main` auto-deploys.
+- **GitHub:** `swagmeister48-hash/Subie-working`. Claude can push directly.
+
+#### ⚠️ Two checkouts — commit & push config/doc changes immediately
+There are TWO working copies of this repo on Abe's machine, and TWO Claudes touch it:
+- **Primary working dir:** `/Users/abe/Subie-working` (this Claude — frontend/UI).
+- **MVP checkout:** `~/Downloads/Subie-mvp-main/parts-compare` — used as a SYNC TARGET
+  (`git -C … pull origin main` after each push) and also where "Cowork Claude" (DB/backend)
+  has been working.
+
+Rule, so this never bites again (uncommitted `CLAUDE.md` edits in the MVP checkout twice
+blocked syncs and nearly got lost):
+- **Whoever edits `CLAUDE.md` / `HANDOFF.md` / any tracked file commits AND pushes it right
+  away** — don't leave uncommitted edits sitting in either checkout.
+- **Author in your own working dir, then push;** don't hand-edit files in the other Claude's
+  checkout except to consolidate someone's stranded work onto `main`.
+- A pull that fails with *"local changes would be overwritten"* means the target has
+  uncommitted work — inspect `git status`/`git diff`, commit & push it first, then pull.
+- A pull that fails on **`index.lock`**: if no `git` process is actually running (check `ps`
+  and the lock's age), it's a stale lock — `rm .git/index.lock` and retry.
 
 ## Pending
 - Vercel deployment (when Abe says go).
