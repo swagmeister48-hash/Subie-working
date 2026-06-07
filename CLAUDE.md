@@ -41,10 +41,13 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 ~131,600 parts, ~185k listings, 12 sellers, ~27,400 cross-seller matched. Old MVP benchmark was 16k — beaten. Some suspicious giant price spreads (Forced Performance turbos) worth auditing.
 
 ## Frontend notes
+- Pages: `/` (catalog, `components/PartsBrowser.tsx`) and `/retailers` (`app/retailers/page.tsx`).
 - New UI overhaul in `components/PartsBrowser.tsx` and `app/globals.css`.
 - Uses the live Supabase RPC contract: `search_parts` with `p_year_from`, `p_year_to`, `p_chassis`, `p_min_save_pct`, `p_sort = 'save_pct'`, and `get_facets()` returning `{v,n}` objects.
 - Added premium dark theme, responsive slide-over filters, active filter chips, savings presets, and stronger list/card hierarchy.
 - Kept analytics tracking, pageview/search/click_buy behavior, `PAGE_SIZE=40`, debounced search, and `Buy now` opening in a new tab.
+- `/retailers`: lists all 12 stores (name, domain, rounded listing count, per-store "Ships to Canada?" note) with a plain-language intro + "confirm at checkout" disclaimer. Data is HARDCODED in `app/retailers/page.tsx` for now (counts + shipping policy) — refresh it when the catalog/policies change. Linked from the banner tagline, the top-right "retailers" header stat, and a footer link. Tracks pageviews like the rest of the site.
+- Mobile filter slide-over locks `<body>` scroll while open (effect with cleanup) and uses `overscroll-behavior: contain` + capped `max-height` on long filter lists so scrolling a list (e.g. Brand) never chains to the page behind it.
 - QA queries:
   - `chassis = VA` should return ~5,688 comparable parts.
   - category `Wheels & Tires` should return ~2,636.
