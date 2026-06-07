@@ -1,6 +1,7 @@
 # Parts Price Comparison — Project Notes for Claude
 
 Owner: Abe (non-technical — explain plainly, do the technical work for him, no jargon dumps).
+Voice: when writing anything user-facing or public (posts, emails, copy), sound like a normal person — casual, direct, no marketing polish, no bullet-point essays. Abe will post these as his own words.
 
 ## What this is
 A Subaru car-parts price-comparison site. Compares prices for the same part across 12+ retailers, links out via "Buy now" buttons. Will expand to more manufacturers later. Old MVP lives in the parent folder (reference only — never modify).
@@ -55,6 +56,7 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
   - facet badge counts should match filtered result totals exactly.
 
 - eBay is PARKED by Abe's decision — pipeline built and dormant, never re-enable without asking him.
+- PRICE HISTORY: backend is LIVE (June 2026) — table `price_history` (part_id, seller_id, total, in_stock, recorded_on; change-only: a row is written only when a price differs from the last recorded one). `record_price_history()` runs inside refresh_part_stats() nightly at 08:30 UTC. Baseline of ~149.6k prices seeded 2026-06-06 — history starts there. Public read-only via RLS. **NO frontend UI yet — do not add price-history charts/UI to the site until Abe explicitly says so.**
 - `search_parts` and `get_facets` are SECURITY DEFINER; test query performance as the anon role, not as owner.
 - After any large data churn, run `ANALYZE` on `parts`/`listings`/`fitments`/`part_stats`.
 
@@ -63,3 +65,4 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 - Sample/seed SQL files in parent folder's `setup/` are historical — DB is live, don't re-run them.
 - Never put real secrets in this repo. `.env.local` is gitignored and holds Supabase URL + publishable key.
 - Crawls must run sequentially per store (concurrent runs deadlock on upserts).
+- SUBARU-ONLY RULE (June 2026, from user feedback): the catalog excludes parts whose title names a foreign make/model with no Subaru-family signal (subaru/wrx/sti/brz/fr-s/gt86/chassis/engine codes). Enforced in crawl-driver at ingestion AND was applied as a one-time DB purge (~37k parts). Dual-fitment parts (e.g. "WRX/Evo") are kept. BRZ/86/FR-S twins always count as Subaru.
