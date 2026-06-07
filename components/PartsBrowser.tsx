@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   searchParts,
   getFacets,
@@ -557,10 +558,10 @@ export default function PartsBrowser() {
                 <p>parts</p>
               </div>
               <span className="header-stats-divider" aria-hidden />
-              <div>
+              <Link className="header-stat-link" href="/retailers" aria-label="See all retailers">
                 <span>{facets.sellers.length || "—"}</span>
-                <p>retailers</p>
-              </div>
+                <p>retailers <span className="stat-arrow" aria-hidden>→</span></p>
+              </Link>
             </div>
           </div>
 
@@ -592,7 +593,13 @@ export default function PartsBrowser() {
           <div className="banner-text">
             {banner.eyebrow && <p className="banner-eyebrow">{banner.eyebrow}</p>}
             <p className="banner-headline">{banner.headline}</p>
-            <p className="banner-sub">{banner.sub}</p>
+            {!chassis && !model ? (
+              <Link className="banner-sub banner-sub-link" href="/retailers">
+                {banner.sub}
+              </Link>
+            ) : (
+              <p className="banner-sub">{banner.sub}</p>
+            )}
           </div>
         </section>
 
@@ -727,6 +734,12 @@ export default function PartsBrowser() {
             <button onClick={() => goTo(page + 1)} disabled={page >= lastPage}>Next →</button>
           </div>
         )}
+
+        <footer className="site-footer">
+          <Link className="footer-link" href="/retailers">
+            The 12 retailers we compare →
+          </Link>
+        </footer>
       </div>
 
       <div className={sidebarOpen ? "backdrop open" : "backdrop"} onClick={() => setSidebarOpen(false)} />

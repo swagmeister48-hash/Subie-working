@@ -1,0 +1,92 @@
+"use client";
+
+import { useEffect } from "react";
+import Link from "next/link";
+import { track } from "@/lib/supabase";
+
+type Retailer = { name: string; url: string; count: string; note?: string };
+
+// Hardcoded for now (rounded live-DB listing counts, biggest catalog first).
+const RETAILERS: Retailer[] = [
+  { name: "Subimods", url: "https://subimods.com", count: "30,900+" },
+  { name: "JD Muscle", url: "https://jdmuscleusa.com", count: "24,000+" },
+  { name: "Import Image Racing", url: "https://www.importimageracing.com", count: "23,100+" },
+  { name: "MAPerformance", url: "https://www.maperformance.com", count: "19,600+" },
+  { name: "RallySport Direct", url: "https://www.rallysportdirect.com", count: "14,100+" },
+  { name: "Subie Supply Co", url: "https://subiesupplyco.ca", count: "12,800+", note: "Canadian store" },
+  { name: "SubiSpeed", url: "https://www.subispeed.com", count: "9,300+" },
+  { name: "FastWRX", url: "https://www.fastwrx.com", count: "6,300+" },
+  { name: "New Provisions Racing", url: "https://www.newprovisionsracing.com", count: "5,700+" },
+  { name: "FT86 Speed Factory", url: "https://www.ft86speedfactory.com", count: "3,200+" },
+  { name: "GrimmSpeed", url: "https://www.grimmspeed.com", count: "440+" },
+  { name: "RaceComp Engineering", url: "https://www.racecompengineering.com", count: "85+" },
+];
+
+export default function RetailersPage() {
+  // Track this pageview the same way the rest of the site does.
+  useEffect(() => {
+    track("pageview", {
+      path: window.location.pathname,
+      referrer: document.referrer || null,
+      ua: navigator.userAgent,
+      screen: `${window.screen.width}x${window.screen.height}`,
+    });
+  }, []);
+
+  return (
+    <main className="wrap">
+      <div className="content">
+        <header className="masthead">
+          <div className="brandbar">
+            <Link className="brand" href="/" aria-label="SubieDeal home">
+              <span className="brand-mark" aria-hidden>✦</span>
+              <span className="brand-name">
+                <span style={{ color: "#3f7dec" }}>SUBIE</span>
+                <span style={{ color: "#3cbf77" }}>DEAL</span>
+              </span>
+            </Link>
+            <Link className="back-link" href="/">← Back to parts</Link>
+          </div>
+        </header>
+
+        <section className="retailers-head">
+          <p className="banner-eyebrow">Our retailers</p>
+          <h1 className="retailers-title">12 stores, one best price</h1>
+          <p className="retailers-intro">
+            Every price on SubieDeal comes from one of these stores. We link you
+            straight to them — no markups, no middleman.
+          </p>
+        </section>
+
+        <ul className="retailer-grid">
+          {RETAILERS.map((r) => (
+            <li key={r.url} className="retailer-card">
+              <a
+                href={r.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="retailer-link"
+              >
+                <span className="retailer-main">
+                  <span className="retailer-name">{r.name}</span>
+                  <span className="retailer-domain">
+                    {r.url.replace(/^https?:\/\//, "")}
+                  </span>
+                  {r.note && <span className="retailer-note">{r.note}</span>}
+                </span>
+                <span className="retailer-meta">
+                  <span className="retailer-count">{r.count}</span>
+                  <span className="retailer-count-label">listings</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <footer className="site-footer">
+          <Link className="footer-link" href="/">← Back to SubieDeal</Link>
+        </footer>
+      </div>
+    </main>
+  );
+}

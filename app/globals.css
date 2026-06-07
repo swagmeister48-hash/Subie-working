@@ -149,6 +149,27 @@ button {
   background: var(--border);
 }
 
+/* The "retailers" stat doubles as a link to the /retailers page. */
+.header-stat-link {
+  display: block;
+  text-align: center;
+  line-height: 1.05;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.header-stat-link:hover p {
+  color: var(--muted-strong);
+}
+
+.header-stats .stat-arrow {
+  margin-left: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--success);
+}
+
 .hero-search {
   position: relative;
   width: 100%;
@@ -269,6 +290,17 @@ button {
   text-transform: uppercase;
   color: var(--muted-strong);
   text-shadow: 0 1px 14px rgba(0, 0, 0, 0.65);
+}
+
+/* The default banner tagline links to the /retailers page. */
+.banner-sub-link {
+  display: inline-block;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.banner-sub-link:hover {
+  color: var(--text);
 }
 
 /* ===== Sidebar filters ================================================== */
@@ -946,4 +978,147 @@ button {
   }
 
   .card-top { gap: 14px; }
+}
+
+/* ===== Retailers page =================================================== */
+.back-link,
+.footer-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--muted-strong);
+  transition: color 0.15s ease;
+}
+
+.back-link:hover,
+.footer-link:hover {
+  color: var(--text);
+}
+
+.retailers-head {
+  max-width: 640px;
+}
+
+.retailers-title {
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  font-size: clamp(1.9rem, 4.4vw, 2.8rem);
+}
+
+.retailers-intro {
+  margin: 14px 0 0;
+  color: var(--muted-strong);
+  font-size: 1rem;
+  line-height: 1.55;
+  max-width: 56ch;
+}
+
+.retailer-grid {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+}
+
+.retailer-card {
+  display: flex;
+}
+
+.retailer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.retailer-link:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+  transform: translateY(-1px);
+}
+
+.retailer-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.retailer-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.retailer-name::after {
+  content: "↗";
+  font-size: 0.78em;
+  color: var(--muted);
+}
+
+.retailer-domain {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.retailer-note {
+  margin-top: 4px;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--success);
+  background: var(--success-soft);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.retailer-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.retailer-count {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--success);
+}
+
+.retailer-count-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.site-footer {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
 }
