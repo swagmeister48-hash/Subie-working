@@ -243,6 +243,18 @@ export default function PartsBrowser() {
     };
   }, [run]);
 
+  // Lock the page behind the mobile filter slide-over so scrolling a long
+  // option list (e.g. Brand) doesn't chain through to the page underneath.
+  // Cleanup always restores scrolling, so the lock can never get stuck on.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [sidebarOpen]);
+
   function goTo(newPage: number) {
     const next = Math.max(0, Math.min(newPage, Math.max(0, Math.ceil(total / PAGE_SIZE) - 1)));
     setPage(next);

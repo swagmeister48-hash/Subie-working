@@ -373,6 +373,13 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 7px;
+  /* Long option lists (Brand has ~80) scroll inside their own box instead of
+     stretching the panel — and the scroll is contained so it can't chain to
+     the page/slide-over behind it. */
+  max-height: 40vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .pill {
@@ -889,6 +896,10 @@ button {
     transform: translateX(-108%);
     transition: transform 0.22s ease;
     overflow-y: auto;
+    /* Keep the slide-over's scroll to itself and give it smooth momentum on
+       touch, so scrolling a filter list never moves the page behind it. */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     border-radius: 0;
     margin: 0;
   }
