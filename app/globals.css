@@ -1080,17 +1080,40 @@ button {
   white-space: nowrap;
 }
 
-.retailer-note {
-  margin-top: 4px;
-  align-self: flex-start;
+/* Per-retailer "Ships to Canada?" note: muted text with a small tone dot. */
+.retailer-ship {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 8px;
   font-family: var(--font-mono);
   font-size: 10.5px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--success);
-  background: var(--success-soft);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  color: var(--muted-strong);
+}
+
+.retailer-ship::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  margin-top: 4px;
   border-radius: 999px;
-  padding: 2px 9px;
+  background: var(--muted);
+}
+
+.retailer-ship.ship-yes::before { background: var(--success); }
+.retailer-ship.ship-quote::before { background: #d9a441; }
+.retailer-ship.ship-no::before { background: var(--danger); }
+
+/* Canadian store gets the flag as its indicator (no dot) + a green tint. */
+.retailer-ship.ship-home {
+  color: var(--success);
+}
+
+.retailer-ship.ship-home::before {
+  display: none;
 }
 
 .retailer-meta {
@@ -1112,6 +1135,13 @@ button {
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  color: var(--muted);
+}
+
+.retailers-disclaimer {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
   color: var(--muted);
 }
 

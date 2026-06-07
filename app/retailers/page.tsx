@@ -4,22 +4,28 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { track } from "@/lib/supabase";
 
-type Retailer = { name: string; url: string; count: string; note?: string };
+// tone drives the small coloured indicator: home = Canadian store,
+// yes = ships to Canada, quote = ships by quote, no = US only.
+type ShipTone = "home" | "yes" | "quote" | "no";
+type Retailer = { name: string; url: string; count: string; ship: { text: string; tone: ShipTone } };
+
+const SHIPS = { text: "Ships to Canada (duties/brokerage on delivery)", tone: "yes" } as const;
+const QUOTE = { text: "Ships to Canada by emailed quote", tone: "quote" } as const;
 
 // Hardcoded for now (rounded live-DB listing counts, biggest catalog first).
 const RETAILERS: Retailer[] = [
-  { name: "Subimods", url: "https://subimods.com", count: "30,900+" },
-  { name: "JD Muscle", url: "https://jdmuscleusa.com", count: "24,000+" },
-  { name: "Import Image Racing", url: "https://www.importimageracing.com", count: "23,100+" },
-  { name: "MAPerformance", url: "https://www.maperformance.com", count: "19,600+" },
-  { name: "RallySport Direct", url: "https://www.rallysportdirect.com", count: "14,100+" },
-  { name: "Subie Supply Co", url: "https://subiesupplyco.ca", count: "12,800+", note: "Canadian store" },
-  { name: "SubiSpeed", url: "https://www.subispeed.com", count: "9,300+" },
-  { name: "FastWRX", url: "https://www.fastwrx.com", count: "6,300+" },
-  { name: "New Provisions Racing", url: "https://www.newprovisionsracing.com", count: "5,700+" },
-  { name: "FT86 Speed Factory", url: "https://www.ft86speedfactory.com", count: "3,200+" },
-  { name: "GrimmSpeed", url: "https://www.grimmspeed.com", count: "440+" },
-  { name: "RaceComp Engineering", url: "https://www.racecompengineering.com", count: "85+" },
+  { name: "Subimods", url: "https://subimods.com", count: "30,900+", ship: SHIPS },
+  { name: "JD Muscle", url: "https://jdmuscleusa.com", count: "24,000+", ship: QUOTE },
+  { name: "Import Image Racing", url: "https://www.importimageracing.com", count: "23,100+", ship: SHIPS },
+  { name: "MAPerformance", url: "https://www.maperformance.com", count: "19,600+", ship: QUOTE },
+  { name: "RallySport Direct", url: "https://www.rallysportdirect.com", count: "14,100+", ship: { text: "US only (check at checkout)", tone: "no" } },
+  { name: "Subie Supply Co", url: "https://subiesupplyco.ca", count: "12,800+", ship: { text: "🇨🇦 Canadian store (prices shown on SubieDeal are their USD prices)", tone: "home" } },
+  { name: "SubiSpeed", url: "https://www.subispeed.com", count: "9,300+", ship: SHIPS },
+  { name: "FastWRX", url: "https://www.fastwrx.com", count: "6,300+", ship: SHIPS },
+  { name: "New Provisions Racing", url: "https://www.newprovisionsracing.com", count: "5,700+", ship: SHIPS },
+  { name: "FT86 Speed Factory", url: "https://www.ft86speedfactory.com", count: "3,200+", ship: SHIPS },
+  { name: "GrimmSpeed", url: "https://www.grimmspeed.com", count: "440+", ship: SHIPS },
+  { name: "RaceComp Engineering", url: "https://www.racecompengineering.com", count: "85+", ship: QUOTE },
 ];
 
 export default function RetailersPage() {
@@ -72,7 +78,7 @@ export default function RetailersPage() {
                   <span className="retailer-domain">
                     {r.url.replace(/^https?:\/\//, "")}
                   </span>
-                  {r.note && <span className="retailer-note">{r.note}</span>}
+                  <span className={`retailer-ship ship-${r.ship.tone}`}>{r.ship.text}</span>
                 </span>
                 <span className="retailer-meta">
                   <span className="retailer-count">{r.count}</span>
@@ -82,6 +88,10 @@ export default function RetailersPage() {
             </li>
           ))}
         </ul>
+
+        <p className="retailers-disclaimer">
+          Shipping policies change — always confirm at the store&rsquo;s checkout.
+        </p>
 
         <footer className="site-footer">
           <Link className="footer-link" href="/">← Back to SubieDeal</Link>
