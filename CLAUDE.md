@@ -38,6 +38,12 @@ A Subaru car-parts price-comparison site. Compares prices for the same part acro
 - Each event has an `env` column: `dev` (localhost/127.0.0.1, OR a browser with `pp_owner=1` in localStorage) vs `prod` (real visitors). Filter `where env = 'prod'` for real stats. Owner mode: visiting the live site with `?owner=1` sets the flag on that browser; `?owner=0` clears it (logic in `lib/supabase.ts`).
 - NEVER bulk-delete from `events` — it now holds real launch traffic (verify UA/referrer/search payloads before touching any row; real sessions show device UAs + social referrers, not headless/localhost).
 
+## Email capture / price alerts (live June 2026)
+- Lead capture for price-drop alerts (built for outreach + retention). Three entry points in the frontend: a **footer signup** (always present, source `footer`), a **popup** (source `popup`, shows ONLY after a deliberate Buy click — never on page entry/scroll; dismissal or signup persists in `localStorage.pp_email_dismissed`), and a **per-part "Alert me" bell** on each card (source `part_alert`).
+- RPC `subscribe_email` writes the email to `subscribers` and, when a part is given, a row to `price_watches (subscriber_id, part_id, target_price, price_at_signup)` (`price_at_signup` read from `part_stats.best_total`). `subscribers` has an `env` column (dev/prod) like `events`. Helper: `subscribeEmail(email, source, partId?, target?)` in `lib/supabase.ts`.
+- **Two RPC overloads exist**: `(p_email,p_source,p_session,p_part_id,p_target)` and `(…,p_target,p_env)`. A 5-arg call is AMBIGUOUS (PostgREST: "could not choose the best candidate function") so the helper passes **`p_env`** to target the 6-arg one. ⚠️ TODO (Cowork Claude / DB side): drop the old 5-arg overload so there's a single function — until then, never remove the 6-arg one or the frontend breaks.
+- localStorage keys: `pp_email` (remembered email → one-tap part alerts), `pp_watches` (JSON array of watched part IDs → bell shows "Watching" across loads), `pp_email_dismissed`. Test signups from localhost/`pp_owner` are tagged `env='dev'`.
+
 ## Catalog state (June 2026)
 ~131,600 parts, ~185k listings, 12 sellers, ~27,400 cross-seller matched. Old MVP benchmark was 16k — beaten. Some suspicious giant price spreads (Forced Performance turbos) worth auditing.
 

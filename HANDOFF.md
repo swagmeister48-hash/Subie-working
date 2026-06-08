@@ -1,6 +1,6 @@
 # Subie — Handoff / Project State
 
-_Last updated: 2026-06-07_
+_Last updated: 2026-06-08_
 
 ## Project state (current)
 
@@ -53,6 +53,14 @@ _Last updated: 2026-06-07_
   badge / Buy buttons / savings; blue (`#2e5fe8`) accent for general UI.
 - Homepage loads the default catalog with a skeleton loader; analytics `track()`
   (pageview / search / click_buy) wired.
+- **Email capture / price alerts** (`components/EmailSignup.tsx`): always-present **footer
+  signup** (source `footer`); a **popup** (source `popup`) that appears ONLY after a Buy click
+  (never on entry/scroll), dismissal/signup remembered in `pp_email_dismissed`; and a quiet
+  orange **"Alert me" bell** on each card (source `part_alert`) — one tap if `pp_email` is
+  known, else a compact email + optional "under $___" target. Watches persist in `pp_watches`
+  → "Watching". All via `subscribeEmail(email, source, partId?, target?)` → `subscribe_email`
+  RPC (writes `subscribers` + `price_watches`). The helper passes `p_env` to disambiguate the
+  two RPC overloads — see CLAUDE.md "Email capture" (drop the old 5-arg overload eventually).
 
 ### Hosting / repo
 - **Vercel:** LIVE as "subiedeal" — every push to `main` auto-deploys.
