@@ -3,6 +3,10 @@
 Owner: Abe (non-technical — explain plainly, do the technical work for him, no jargon dumps).
 Voice: when writing anything user-facing or public (posts, emails, copy), sound like a normal person — casual, direct, no marketing polish, no bullet-point essays. Abe will post these as his own words.
 
+## Two-Claude workflow (read first)
+Two assistants maintain this repo. **Claude Code** owns the **frontend** (`app/`, `components/`, `lib/`, `app/globals.css`; the "Frontend notes" section + the frontend half of "Email capture / price alerts"). **Cowork Claude** owns the **backend** (DB, RPCs, crawlers, edge functions, automation, data pipelines — every other section/bullet here). Each edits ONLY its own sections of this file; they don't overlap, so commits never conflict.
+**Session-start sweep — Claude Code, before doing anything else:** consolidate the backend's notes first. Check the MVP checkout `~/Downloads/Subie-mvp-main/parts-compare` for uncommitted `CLAUDE.md`/`HANDOFF.md` changes; if any, commit + push them, then fast-forward both checkouts so work starts from one consolidated `main`. Glance at the incoming notes as you go (that's how a stale RPC-overload note got caught). Mechanics + failure modes: HANDOFF "Two checkouts".
+
 ## What this is
 A Subaru car-parts price-comparison site. Compares prices for the same part across 12+ retailers, links out via "Buy now" buttons. Will expand to more manufacturers later. Old MVP lives in the parent folder (reference only — never modify).
 

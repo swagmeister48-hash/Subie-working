@@ -84,6 +84,18 @@ blocked syncs and nearly got lost):
 - A pull that fails on **`index.lock`**: if no `git` process is actually running (check `ps`
   and the lock's age), it's a stale lock — `rm .git/index.lock` and retry.
 
+**Section ownership + session-start sweep (agreed protocol):**
+- **CLAUDE.md is split by owner:** Cowork Claude owns the **backend** sections (DB, RPCs,
+  crawlers, edge functions, automation, data pipelines); Claude Code owns the **frontend**
+  sections (Frontend notes, the frontend half of Email capture). Each edits only its own
+  sections — they don't overlap, so commits never conflict (that's what makes the sweep
+  ordering-safe).
+- **Claude Code, at the START of every session, before anything else:** sweep in the backend's
+  notes. Check the MVP checkout for uncommitted `CLAUDE.md`/`HANDOFF.md` changes; if any,
+  commit + push them, then fast-forward both checkouts. Start work only from a consolidated
+  `main`. (Eyeball the incoming notes while doing it — that's how the stale 5-arg-overload note
+  got caught.)
+
 ## Pending
 - Vercel deployment (when Abe says go).
 - Audit suspicious giant price spreads (e.g. Forced Performance turbos).
