@@ -268,6 +268,12 @@ export function partSlug(name: string, id: number): string {
   return `${base}-${id}`;
 }
 
+// Collapse runs of whitespace in a part name for display/titles
+// (some scraped names have doubled spaces, e.g. "35    Hyper Silver").
+export function cleanName(name: string): string {
+  return (name || "").replace(/\s+/g, " ").trim();
+}
+
 export type PartPageListing = {
   seller: string;
   total: number;

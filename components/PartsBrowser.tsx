@@ -9,6 +9,7 @@ import {
   getFacetCounts,
   track,
   partSlug,
+  cleanName,
   PAGE_SIZE,
   EMPTY_FACET_COUNTS,
   type Part,
@@ -689,7 +690,7 @@ export default function PartsBrowser() {
                   <div>
                     <p className="card-name">
                       <Link className="card-name-link" href={`/part/${partSlug(p.name, p.id)}`}>
-                        {p.name}
+                        {cleanName(p.name)}
                       </Link>
                     </p>
                     <p className="card-sub">

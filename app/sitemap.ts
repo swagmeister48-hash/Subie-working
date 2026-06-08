@@ -2,8 +2,12 @@ import type { MetadataRoute } from "next";
 import { sitemapSlugs } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/site";
 
-// Rebuild the sitemap daily.
-export const revalidate = 86400;
+// Generate at REQUEST time, not build time. Vercel's build-time prerender of
+// this route came back empty (the build-step fetch to Supabase didn't return
+// data), which shipped a sitemap with only the static routes. The part pages
+// work in prod because they're dynamic; render the sitemap the same way so it
+// fetches at runtime where Supabase is reachable.
+export const dynamic = "force-dynamic";
 
 // ~20,900 deduped cross-shoppable slugs — comfortably under the 50k-per-file
 // sitemap limit, so a single sitemap is enough. If the count ever approaches

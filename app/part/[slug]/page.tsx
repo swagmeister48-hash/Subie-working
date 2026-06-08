@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPartPage, type PartPage } from "@/lib/supabase";
+import { getPartPage, cleanName, type PartPage } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/site";
 
 // Server-rendered + revalidated hourly (ISR). Full HTML is produced on the
@@ -49,11 +49,12 @@ export async function generateMetadata({
   const part = await getPartPage(slug);
   if (!part) return { title: "Part not found — SubieDeal", robots: { index: false } };
 
+  const name = cleanName(part.name);
   const fit = fitmentString(part);
   const stores = `${part.seller_count} store${part.seller_count === 1 ? "" : "s"}`;
-  const title = `${part.name} — Compare Prices Across 14 Subaru Retailers | SubieDeal`;
+  const title = `${name} — Compare Prices Across 14 Subaru Retailers | SubieDeal`;
   const desc =
-    `Compare prices for the ${part.name} across 14 Subaru parts retailers and find it for sale at ` +
+    `Compare prices for the ${name} across 14 Subaru parts retailers and find it for sale at ` +
     `the lowest price. In stock from ${stores}, starting at ${fmt(part.best_total)}.` +
     (fit ? ` Fits ${fit}.` : "");
   const canonical = `${SITE_URL}/part/${part.slug}`;
@@ -72,6 +73,7 @@ export default async function PartPage({ params }: { params: Promise<{ slug: str
   const part = await getPartPage(slug);
   if (!part) notFound();
 
+  const name = cleanName(part.name);
   const fit = fitmentString(part);
   const stores = `${part.seller_count} store${part.seller_count === 1 ? "" : "s"}`;
   const canonical = `${SITE_URL}/part/${part.slug}`;
@@ -85,7 +87,7 @@ export default async function PartPage({ params }: { params: Promise<{ slug: str
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: part.name,
+    name,
     ...(part.brand ? { brand: { "@type": "Brand", name: part.brand } } : {}),
     ...(part.category ? { category: part.category } : {}),
     ...(part.part_number ? { sku: part.part_number, mpn: part.part_number } : {}),
@@ -126,10 +128,10 @@ export default async function PartPage({ params }: { params: Promise<{ slug: str
 
         <article className="part-page">
           {part.category && <p className="part-eyebrow">{part.category}</p>}
-          <h1 className="part-title">{part.name}</h1>
+          <h1 className="part-title">{name}</h1>
 
           <p className="part-intro">
-            Compare prices for the {part.name} across 14 Subaru parts retailers and find it for sale
+            Compare prices for the {name} across 14 Subaru parts retailers and find it for sale
             at the lowest price. In stock from {stores}, starting at {fmt(part.best_total)}.
           </p>
 
