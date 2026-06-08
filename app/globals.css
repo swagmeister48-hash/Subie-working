@@ -1152,8 +1152,296 @@ button {
 
 .site-footer {
   margin-top: 12px;
-  padding-top: 20px;
+  padding-top: 24px;
   border-top: 1px solid var(--border);
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* ===== Email capture (footer signup + popup) =========================== */
+.footer-signup {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.footer-signup-label {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-strong);
+}
+
+.email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.email-row {
+  display: flex;
+  gap: 8px;
+}
+
+.email-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  padding: 11px 13px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.email-input::placeholder {
+  color: var(--muted);
+}
+
+.email-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.email-submit {
+  flex: 0 0 auto;
+  padding: 11px 16px;
+  border-radius: 9px;
+  background: var(--success);
+  color: #04200f;
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+}
+
+.email-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(60, 191, 119, 0.24);
+}
+
+.email-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.email-error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.email-confirm {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--success);
+}
+
+.email-confirm-footer {
+  text-align: center;
+}
+
+/* Popup */
+.email-pop-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  padding: 20px;
+  background: rgba(6, 9, 18, 0.66);
+  animation: email-fade 0.18s ease;
+}
+
+.email-pop {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 26px 24px;
+  animation: email-rise 0.2s ease;
+}
+
+.email-pop-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s ease;
+}
+
+.email-pop-close:hover {
+  color: var(--text);
+}
+
+.email-pop-eyebrow {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--success);
+}
+
+.email-pop-copy {
+  margin: 0 0 18px;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+@keyframes email-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes email-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Per-part price alert (quiet orange bell on each card) ============ */
+.part-alert {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 7px;
+  margin: -6px 0 14px;
+}
+
+.part-alert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(242, 145, 61, 0.34);
+  color: #f2913d;
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.part-alert-btn:hover {
+  background: rgba(242, 145, 61, 0.12);
+  border-color: rgba(242, 145, 61, 0.55);
+}
+
+.part-alert-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.part-alert-watching {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f2913d;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.part-alert-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.pa-input,
+.pa-price-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.pa-input {
+  width: 168px;
+  max-width: 100%;
+}
+
+.pa-input:focus,
+.pa-price-input:focus {
+  outline: none;
+  border-color: #f2913d;
+  box-shadow: 0 0 0 3px rgba(242, 145, 61, 0.16);
+}
+
+.pa-input::placeholder,
+.pa-price-input::placeholder {
+  color: var(--muted);
+}
+
+.pa-price {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pa-dollar {
+  position: absolute;
+  left: 10px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.pa-price-input {
+  width: 140px;
+  padding-left: 20px;
+}
+
+.pa-submit {
+  padding: 8px 13px;
+  border-radius: 8px;
+  background: #f2913d;
+  color: #2a1606;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.pa-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(242, 145, 61, 0.22);
+}
+
+.pa-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+.pa-error {
+  margin: 0;
+  text-align: right;
 }

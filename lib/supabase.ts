@@ -143,6 +143,34 @@ export function track(type: "pageview" | "search" | "click_buy", data: Record<st
   }
 }
 
+// Email capture: backend RPC `subscribe_email` already exists in Supabase.
+// Returns { ok: true } or { ok: false, error: "..." }. `target` is an optional
+// price threshold for per-part alerts ("email me when it drops under $X").
+//
+// Note: the RPC has two overloads (…p_target) and (…p_target, p_env). Passing
+// p_env makes the call match exactly one (otherwise PostgREST errors with
+// "could not choose the best candidate function"). env mirrors analytics: own/
+// local visits are tagged "dev" so test signups stay out of prod stats.
+export async function subscribeEmail(email: string, source: string, partId?: number, target?: number) {
+  let env = "prod";
+  try {
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      localStorage.getItem("pp_owner") === "1"
+    ) {
+      env = "dev";
+    }
+  } catch {
+    // default to prod
+  }
+  const { data, error } = await supabase.rpc("subscribe_email", {
+    p_email: email, p_source: source, p_session: sessionId(), p_part_id: partId ?? null, p_target: target ?? null, p_env: env,
+  });
+  if (error) return { ok: false, error: error.message };
+  return (data as { ok: boolean; error?: string }) ?? { ok: false };
+}
+
 export type FacetOption = { v: string; n: number };
 
 export type Facets = {

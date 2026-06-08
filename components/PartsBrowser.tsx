@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { EmailPopup, EmailSignupForm, PartAlert, ENGAGE_EVENT } from "@/components/EmailSignup";
 
 // Layout effect that no-ops cleanly during SSR (avoids the useLayoutEffect warning).
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -700,6 +701,8 @@ export default function PartsBrowser() {
                   </div>
                 </div>
 
+                <PartAlert partId={p.id} />
+
                 <div className="listing-grid">
                   {p.listings.map((listing, index) => (
                     <div className="row" key={`${listing.seller}-${listing.condition ?? "New"}-${index}`}>
@@ -733,6 +736,8 @@ export default function PartsBrowser() {
                               seller_count: p.listings.length,
                               url: listing.url,
                             });
+                            // Engagement signal for the email-capture popup.
+                            window.dispatchEvent(new Event(ENGAGE_EVENT));
                             window.open(listing.url, "_blank", "noopener");
                           }}
                           disabled={!listing.url}
@@ -768,11 +773,17 @@ export default function PartsBrowser() {
         )}
 
         <footer className="site-footer">
+          <div className="footer-signup">
+            <p className="footer-signup-label">Get price-drop alerts</p>
+            <EmailSignupForm source="footer" variant="footer" />
+          </div>
           <Link className="footer-link" href="/retailers">
             The 14 retailers we compare →
           </Link>
         </footer>
       </div>
+
+      <EmailPopup />
 
       <div className={sidebarOpen ? "backdrop open" : "backdrop"} onClick={() => setSidebarOpen(false)} />
     </div>
