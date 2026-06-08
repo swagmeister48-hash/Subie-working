@@ -252,3 +252,67 @@ export async function getFacetCounts(opts: {
     colors: d.colors ?? {},
   };
 }
+
+// ===== SEO part pages =====================================================
+
+// Mirrors the `parts.slug` generated column exactly:
+// left(name → lower → non-alnum runs to "-" → trim "-", 80) + "-" + id.
+// get_part_page() actually resolves by the trailing id, but matching the real
+// slug keeps internal links canonical.
+export function partSlug(name: string, id: number): string {
+  const base = (name || "part")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+  return `${base}-${id}`;
+}
+
+export type PartPageListing = {
+  seller: string;
+  total: number;
+  url: string | null;
+  in_stock: boolean;
+  condition?: string | null;
+};
+
+export type PartPage = {
+  id: number;
+  name: string;
+  brand: string | null;
+  slug: string;
+  category: string | null;
+  part_number: string | null;
+  chassis: string[];
+  best_total: number;
+  ref_high: number | null;
+  seller_count: number;
+  save_pct: number;
+  // Preferred: per-model fitment with its own year span.
+  fitment: { model: string; years: string }[] | null;
+  // Legacy fallback (global span across all models).
+  models: string[] | null;
+  year_min: number | null;
+  year_max: number | null;
+  listings: PartPageListing[];
+};
+
+// Full payload for a server-rendered /part/[slug] page. Returns null for a bad slug.
+export async function getPartPage(slug: string): Promise<PartPage | null> {
+  const { data, error } = await supabase.rpc("get_part_page", { p_slug: slug });
+  if (error) {
+    console.error("get_part_page error:", error.message);
+    return null;
+  }
+  return (data as PartPage | null) ?? null;
+}
+
+// One page of cross-shoppable slugs for the sitemap.
+export async function sitemapSlugs(limit: number, offset: number): Promise<{ slug: string; sellers: number }[]> {
+  const { data, error } = await supabase.rpc("sitemap_slugs", { p_limit: limit, p_offset: offset });
+  if (error) {
+    console.error("sitemap_slugs error:", error.message);
+    return [];
+  }
+  return (data as { slug: string; sellers: number }[]) ?? [];
+}

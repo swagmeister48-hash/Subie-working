@@ -3,14 +3,12 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { EmailPopup, EmailSignupForm, PartAlert, ENGAGE_EVENT } from "@/components/EmailSignup";
-
-// Layout effect that no-ops cleanly during SSR (avoids the useLayoutEffect warning).
-const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import {
   searchParts,
   getFacets,
   getFacetCounts,
   track,
+  partSlug,
   PAGE_SIZE,
   EMPTY_FACET_COUNTS,
   type Part,
@@ -18,6 +16,9 @@ import {
   type FacetCounts,
   type SortOption,
 } from "@/lib/supabase";
+
+// Layout effect that no-ops cleanly during SSR (avoids the useLayoutEffect warning).
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function fmt(n: number) {
   return "$" + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -686,7 +687,11 @@ export default function PartsBrowser() {
               <div className="card" key={p.id}>
                 <div className="card-top">
                   <div>
-                    <p className="card-name">{p.name}</p>
+                    <p className="card-name">
+                      <Link className="card-name-link" href={`/part/${partSlug(p.name, p.id)}`}>
+                        {p.name}
+                      </Link>
+                    </p>
                     <p className="card-sub">
                       {[p.brand, p.category, p.color, p.part_number ? `#${p.part_number}` : null, p.models.join(", "), yearLabel]
                         .filter(Boolean)
