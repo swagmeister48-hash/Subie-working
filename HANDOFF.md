@@ -59,8 +59,8 @@ _Last updated: 2026-06-08_
   orange **"Alert me" bell** on each card (source `part_alert`) — one tap if `pp_email` is
   known, else a compact email + optional "under $___" target. Watches persist in `pp_watches`
   → "Watching". All via `subscribeEmail(email, source, partId?, target?)` → `subscribe_email`
-  RPC (writes `subscribers` + `price_watches`). The helper passes `p_env` to disambiguate the
-  two RPC overloads — see CLAUDE.md "Email capture" (drop the old 5-arg overload eventually).
+  RPC (writes `subscribers` + `price_watches`). The RPC is a single 6-arg overload now; the
+  helper passes `p_env` (dev/prod tag) — see CLAUDE.md "Email capture / price alerts".
 
 ### Hosting / repo
 - **Vercel:** LIVE as "subiedeal" — every push to `main` auto-deploys.
