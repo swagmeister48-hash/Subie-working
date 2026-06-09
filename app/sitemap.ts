@@ -1,36 +1,54 @@
 import type { MetadataRoute } from "next";
-import { sitemapSlugs } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { SITE_URL } from "@/lib/site";
 
-// Generate at REQUEST time, not build time. Vercel's build-time prerender of
-// this route came back empty (the build-step fetch to Supabase didn't return
-// data), which shipped a sitemap with only the static routes. The part pages
-// work in prod because they're dynamic; render the sitemap the same way so it
-// fetches at runtime where Supabase is reachable.
+// Generate at REQUEST time (not build). Vercel's build-time prerender shipped
+// an empty sitemap; render at runtime where Supabase is reachable.
 export const dynamic = "force-dynamic";
 
-// ~20,900 deduped cross-shoppable slugs — comfortably under the 50k-per-file
-// sitemap limit, so a single sitemap is enough. If the count ever approaches
-// ~45k, switch to Next's generateSitemaps() to split into a sitemap index.
-//
-// NOTE: PostgREST caps any RPC result at 1000 rows regardless of p_limit, so we
-// page in 1000s and stop on the first short/empty page.
+const PAGE = 1000; // PostgREST caps RPC results at 1000 rows regardless of p_limit
+const MAX_PAGES = 60; // safety cap (60k slugs)
+const BATCH = 6; // pages fetched concurrently per round (bounds wall-clock + load)
+const ATTEMPTS = 3; // per-page retries — a single transient failure must not empty the sitemap
+
+// Fetch one 1000-row page, retrying transient errors. Throws (does NOT return
+// []) on persistent failure so the caller can't mistake an error for "the end".
+async function fetchPage(offset: number): Promise<{ slug: string }[]> {
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+    const { data, error } = await supabase.rpc("sitemap_slugs", { p_limit: PAGE, p_offset: offset });
+    if (!error && data) return data as { slug: string }[];
+    console.error(
+      `[sitemap] offset=${offset} attempt ${attempt}/${ATTEMPTS} failed: ${error?.message ?? "no data returned"}`,
+    );
+    if (attempt < ATTEMPTS) await new Promise((r) => setTimeout(r, 200 * attempt));
+  }
+  throw new Error(`[sitemap] sitemap_slugs failed at offset ${offset} after ${ATTEMPTS} attempts`);
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: "daily", priority: 1 },
     { url: `${SITE_URL}/retailers`, changeFrequency: "weekly", priority: 0.6 },
   ];
 
-  const PAGE = 1000; // == PostgREST max-rows; a full page means "there may be more"
-  const MAX = 50000; // hard safety cap (sitemaps.org limit per file)
-  for (let offset = 0; entries.length < MAX; offset += PAGE) {
-    const rows = await sitemapSlugs(PAGE, offset);
-    if (!rows.length) break;
-    for (const r of rows) {
-      entries.push({ url: `${SITE_URL}/part/${r.slug}`, changeFrequency: "weekly", priority: 0.7 });
+  let partCount = 0;
+  let reachedEnd = false;
+  for (let base = 0; !reachedEnd && base < MAX_PAGES * PAGE; base += PAGE * BATCH) {
+    const offsets = Array.from({ length: BATCH }, (_, i) => base + i * PAGE);
+    const pages = await Promise.all(offsets.map(fetchPage)); // rejects → route 500s (logged), never ships empty
+    for (const rows of pages) {
+      for (const r of rows) {
+        entries.push({ url: `${SITE_URL}/part/${r.slug}`, changeFrequency: "weekly", priority: 0.7 });
+        partCount++;
+      }
+      if (rows.length < PAGE) reachedEnd = true; // a short/empty page is the last one
     }
-    if (rows.length < PAGE) break; // last page
   }
 
+  console.log(`[sitemap] generated ${partCount} part URLs (${entries.length} total entries)`);
+  if (partCount === 0) {
+    // Loud failure beats a silently-empty sitemap getting submitted to Google.
+    throw new Error("[sitemap] produced 0 part URLs — refusing to serve a static-only sitemap");
+  }
   return entries;
 }
