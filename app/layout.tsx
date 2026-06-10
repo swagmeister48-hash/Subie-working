@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { MetaHTMLAttributes } from "react";
 import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
@@ -40,6 +41,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <body>
+        {/* Impact.com site verification — MUST keep value= (not content=), so it
+            can't go through Next's metadata helpers (those emit content=). React 19
+            hoists this <meta> into <head>; the `as` cast is because the meta type
+            doesn't include `value`. */}
+        <meta
+          {...({
+            name: "impact-site-verification",
+            value: "34b897bf-f1af-4adc-8f51-a4a554e1f0f2",
+          } as unknown as MetaHTMLAttributes<HTMLMetaElement>)}
+        />
         {children}
         {/* Optimized GA4 (loads via next/script strategy — keeps CWV intact).
             Independent of the custom events-table analytics. */}
