@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 // Display / headings — characterful grotesk with a motorsport-gauge personality.
@@ -38,7 +39,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Optimized GA4 (loads via next/script strategy — keeps CWV intact).
+            Independent of the custom events-table analytics. */}
+        <GoogleAnalytics gaId="G-37BC372TDM" />
+      </body>
     </html>
   );
 }
