@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { EmailPopup, EmailSignupForm, PartAlert, ENGAGE_EVENT } from "@/components/EmailSignup";
+import WeeklyDeals from "@/components/WeeklyDeals";
 import {
   searchParts,
   getFacets,
@@ -77,7 +78,7 @@ function resolveBanner(chassis: string, model: string) {
   let slug = "default";
   let eyebrow = "";
   let headline = "For enthusiasts and professionals.";
-  let sub = "14 retailers and counting!";
+  let sub = "18 retailers and counting!";
   if (chassis) {
     slug = CHASSIS_IMG[chassis] || "default";
     eyebrow = "Chassis";
@@ -638,6 +639,8 @@ export default function PartsBrowser() {
           </div>
         </section>
 
+        {!q && <WeeklyDeals filters={{ model, chassis, category: cat, brand, yearFrom, yearTo }} />}
+
         <div className="toolbar">
           <button className="filter-toggle" onClick={() => setSidebarOpen(true)}>
             Filters
@@ -784,7 +787,7 @@ export default function PartsBrowser() {
             <EmailSignupForm source="footer" variant="footer" />
           </div>
           <Link className="footer-link" href="/retailers">
-            The 14 retailers we compare →
+            The 18 retailers we compare →
           </Link>
         </footer>
       </div>
