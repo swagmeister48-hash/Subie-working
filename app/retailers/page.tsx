@@ -13,21 +13,26 @@ const SHIPS = { text: "Ships to Canada (duties/brokerage on delivery)", tone: "y
 const QUOTE = { text: "Ships to Canada by emailed quote", tone: "quote" } as const;
 const CHECK = { text: "Ships to Canada (check at checkout)", tone: "check" } as const;
 
-// Hardcoded for now (rounded live-DB listing counts, biggest catalog first).
+// Hardcoded (rounded live-DB total listing counts as of 2026-07, biggest catalog
+// first). Refresh when the catalog/roster changes.
 const RETAILERS: Retailer[] = [
-  { name: "Subimods", url: "https://subimods.com", count: "30,900+", ship: SHIPS },
-  { name: "JD Muscle", url: "https://jdmuscleusa.com", count: "24,000+", ship: QUOTE },
-  { name: "Import Image Racing", url: "https://www.importimageracing.com", count: "23,100+", ship: SHIPS },
-  { name: "MAPerformance", url: "https://www.maperformance.com", count: "19,600+", ship: QUOTE },
-  { name: "RallySport Direct", url: "https://www.rallysportdirect.com", count: "14,100+", ship: { text: "US only (check at checkout)", tone: "no" } },
-  { name: "Subie Supply Co", url: "https://subiesupplyco.ca", count: "12,800+", ship: { text: "🇨🇦 Canadian store (prices shown on SubieDeal are their USD prices)", tone: "home" } },
-  { name: "SubiSpeed", url: "https://www.subispeed.com", count: "9,300+", ship: SHIPS },
-  { name: "Flatirons Tuning", url: "https://www.flatironstuning.com", count: "8,800+", ship: CHECK },
+  { name: "Subimods", url: "https://subimods.com", count: "31,700+", ship: SHIPS },
+  { name: "JD Muscle", url: "https://jdmuscleusa.com", count: "26,300+", ship: QUOTE },
+  { name: "Import Image Racing", url: "https://www.importimageracing.com", count: "25,300+", ship: SHIPS },
+  { name: "MAPerformance", url: "https://www.maperformance.com", count: "20,600+", ship: QUOTE },
+  { name: "TurnIn Concepts", url: "https://www.turninconcepts.com", count: "16,500+", ship: CHECK },
+  { name: "RallySport Direct", url: "https://www.rallysportdirect.com", count: "16,200+", ship: { text: "US only (check at checkout)", tone: "no" } },
+  { name: "Subie Supply Co", url: "https://subiesupplyco.ca", count: "14,100+", ship: { text: "🇨🇦 Canadian store (prices shown on SubieDeal are their USD prices)", tone: "home" } },
+  { name: "SubiSpeed", url: "https://www.subispeed.com", count: "11,300+", ship: SHIPS },
+  { name: "Flatirons Tuning", url: "https://www.flatironstuning.com", count: "9,600+", ship: CHECK },
   { name: "FastWRX", url: "https://www.fastwrx.com", count: "6,300+", ship: SHIPS },
-  { name: "New Provisions Racing", url: "https://www.newprovisionsracing.com", count: "5,700+", ship: SHIPS },
-  { name: "SMY Performance", url: "https://smyperformance.com", count: "3,600+", ship: CHECK },
-  { name: "FT86 Speed Factory", url: "https://www.ft86speedfactory.com", count: "3,200+", ship: SHIPS },
-  { name: "GrimmSpeed", url: "https://www.grimmspeed.com", count: "440+", ship: SHIPS },
+  { name: "New Provisions Racing", url: "https://www.newprovisionsracing.com", count: "6,200+", ship: SHIPS },
+  { name: "SMY Performance", url: "https://smyperformance.com", count: "3,900+", ship: CHECK },
+  { name: "FT86 Speed Factory", url: "https://www.ft86speedfactory.com", count: "3,700+", ship: SHIPS },
+  { name: "FTSpeed", url: "https://www.ftspeed.com", count: "3,300+", ship: SHIPS },
+  { name: "PERRIN", url: "https://www.perrin.com", count: "720+", ship: CHECK },
+  { name: "GrimmSpeed", url: "https://www.grimmspeed.com", count: "690+", ship: SHIPS },
+  { name: "LP Aventure", url: "https://lachuteperformance.com", count: "420+", ship: { text: "🇨🇦 Canadian store (Lachute, QC)", tone: "home" } },
   { name: "RaceComp Engineering", url: "https://www.racecompengineering.com", count: "85+", ship: QUOTE },
 ];
 
@@ -60,7 +65,7 @@ export default function RetailersPage() {
 
         <section className="retailers-head">
           <p className="banner-eyebrow">Our retailers</p>
-          <h1 className="retailers-title">14 stores, one best price</h1>
+          <h1 className="retailers-title">18 stores, one best price</h1>
           <p className="retailers-intro">
             Every price on SubieDeal comes from one of these stores. We link you
             straight to them — no markups, no middleman.
